@@ -94,37 +94,41 @@ const app = new Vue({
       console.log(dataName, models);
 
       // Set data infomaition
-      const classes = this.dataInfo[dataName].classNames;
+      const classNames = this.dataInfo[dataName].classNames;
       const modelNames = _.keys(models);
 
       // Set svg root
       const root = d3.select('#vis-ranking');
 
       // Set width & height
-      const WIDTH = 1488;
-      const HEIGHT = 376;
+      const WIDTH = 1504;
+      const HEIGHT = 392;
       const LEFT_LEGEND_WIDTH = 140;
-      const TOP_LEGEND_HEIGHT = 50;
+      const TOP_LEGEND_HEIGHT = 70;
       const RANKING_VIS_WIDHT = WIDTH - LEFT_LEGEND_WIDTH;
       const RANKING_VIS_HEIGHT = HEIGHT - TOP_LEGEND_HEIGHT;
+      const CELL_WIDTH = RANKING_VIS_WIDHT / classNames.length;
+      const CELL_HEIGHT = RANKING_VIS_HEIGHT / modelNames.length;
 
-      const CELL_WIDTH = RANKING_VIS_WIDHT / classes.length;
-      const CELL_HEIGHT = RANKING_VIS_HEIGHT / (modelNames.length + 1);
-
-      console.log(CELL_HEIGHT);
 
       // Draw legend
-      // ==> Draw top legend
-      VisUtil.text(root, 'Actual Classes', { x: WIDTH / 2, fill: '#333', size: '24px' });
-      _.forEach(classes, (className, i) => {
-        const x = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
-        VisUtil.text(root, className, { x, y: TOP_LEGEND_HEIGHT });
+      VisUtil.text(root, 'Actual Classes',
+        { x: WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
+
+      // => Draw class lagend (Top)
+      _.forEach(classNames, (className, i) => {
+        const x_text = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
+        VisUtil.text(root, className, { x: x_text, y: TOP_LEGEND_HEIGHT - 5, baseline: 'ideographic' });
       });
 
-      // ==> Darw left legend
+      // => Draw model lagend (Left)
       _.forEach(modelNames, (modelName, i) => {
-        const y = TOP_LEGEND_HEIGHT + (i + 1) * CELL_HEIGHT;
-        VisUtil.text(root, modelName, { x: 20, y, anchor: 'start' });
+        const y = TOP_LEGEND_HEIGHT + i * CELL_HEIGHT;
+        if (i % 2 === 0) {
+          VisUtil.rect(root, { y: y, w: WIDTH, h: CELL_HEIGHT, fill: '#f3f3f3' });
+        }
+        const y_text = y + CELL_HEIGHT / 2;
+        VisUtil.text(root, modelName, { x: 20, y: y_text, anchor: 'start' });
       });
 
     }

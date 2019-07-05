@@ -27,7 +27,7 @@ body {
 
 /* sections */
 .section {
-  padding: 8px 16px 4px 16px;
+  padding: 8px 0 0 16px;
   position: absolute;
 }
 
@@ -73,15 +73,16 @@ body {
 /* Items */
 .title {
   vertical-align: super;
-  height: 32px;
+  height: 20px;
+  /* overlap 8px*/
   font-size: 28px;
   font-weight: 600;
 }
 
 /* SVG */
 svg {
-  background: #dfe;
+  /* background: #dfe; */
   width: 100%;
-  height: calc(100% - 32px);
+  height: calc(100% - 20px);
   /* 100% - title.height*/
 }
