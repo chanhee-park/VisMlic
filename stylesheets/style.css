@@ -34,7 +34,7 @@ body {
 .section__left {
   left: 0;
   /* 
-  ** 1520px == 140px (Names) + 1380px (Visualizaion)
+  ** 1520px == 120px (Names) + 1400px (Visualizaion)
   ** Ranking & Confusion 
   */
   width: 1520px;

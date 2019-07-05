@@ -103,13 +103,14 @@ const app = new Vue({
       // Set width & height
       const WIDTH = 1504;
       const HEIGHT = 388;
-      const LEFT_LEGEND_WIDTH = 140;
+      const LEFT_LEGEND_WIDTH = 120;
       const TOP_LEGEND_HEIGHT = 70;
       const RANKING_VIS_WIDHT = WIDTH - LEFT_LEGEND_WIDTH;
       const RANKING_VIS_HEIGHT = HEIGHT - TOP_LEGEND_HEIGHT;
       const CELL_WIDTH = RANKING_VIS_WIDHT / classNames.length;
       const CELL_HEIGHT = RANKING_VIS_HEIGHT / modelNames.length;
 
+      // TODO: 평균 성능 칸 만들기 : 위에 넓이 변수도 추가해서 가독성도 챙기자. 수정하기 훨 쉬워진다.
 
       // Draw legend
       VisUtil.text(root, 'Actual Classes',
