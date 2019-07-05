@@ -1,0 +1,70 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif !important;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  background: #eee;
+}
+
+/* app */
+
+.app {
+  /* 1.41:1 Ratio (A4) */
+  width: 1920px;
+  height: 1360px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: #fff;
+  box-shadow: 2px 2px 10px 1px rgba(119, 119, 119, 1);
+}
+
+/* sections */
+
+.section {
+  padding: 12px;
+  border: 1px solid #aaa;
+  position: absolute;
+}
+
+.section__left {
+  left: 0;
+  /* 
+  ** 1520px == 240px (Names) + 1280px (Visualizaion)
+  ** Ranking & Confusion 
+  */
+  width: 1520px;
+}
+
+.section__right {
+  right: 0;
+  /*  
+  ** 400px == 1920px (App's Width) - 1520px (Left's Width) 
+  ** Square 2d projection & Instances
+  */
+  width: calc(1920px - 1520px);
+}
+
+.section__top {
+  top: 0;
+  /* 
+  ** 420px == 20px (Names) + 400px (Visualization)
+  ** Ranking & Square 2d projection 
+  */
+  height: 420px;
+}
+
+.section__bottom {
+  bottom: 0;
+  /* 
+  ** 940px == 1360px (App's Height) - 420px (Top's Height) 
+  ** Confusion & Instances 
+  */
+  height: calc(1360px - 420px);
+}

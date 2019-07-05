@@ -20,7 +20,37 @@
       sizes="16x16"
       href="/images/favicon_io/favicon-16x16.png"
     />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
   </head>
-  <body></body>
+  <body>
+    <div id="app" class="app">
+      <div class="section section__left section__top ranking" id="ranking">
+        {{ sections.ranking.title }}
+      </div>
+      <div
+        class="section section__left section__bottom confusion"
+        id="confusion"
+      >
+        {{ sections.confusion.title }}
+      </div>
+      <div
+        class="section section__right section__top projection"
+        id="projection"
+      >
+        {{ sections.projection.title }}
+      </div>
+      <div
+        class="section section__right section__bottom instances"
+        id="instances"
+      >
+        {{ sections.instances.title }}
+      </div>
+    </div>
+  </body>
+  <script src="scripts/app.js"></script>
 </html>
