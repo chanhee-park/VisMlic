@@ -5,17 +5,17 @@ const app = new Vue({
     title: 'VisMLCV',
     sections: {
       ranking: {
-        title: 'Ranking',
+        title: 'Ranking & Confusion Matrix',
         sort_options: ['recall', 'presicion'],
       },
       confusion: {
-        title: 'Confusion Matrix'
+        title: ''
       },
       projection: {
         title: '2D Projection'
       },
       instances: {
-        title: 'Instance Analysis'
+        title: 'Instances'
       },
     },
     // data
@@ -102,7 +102,7 @@ const app = new Vue({
 
       // Set width & height
       const WIDTH = 1504;
-      const HEIGHT = 392;
+      const HEIGHT = 388;
       const LEFT_LEGEND_WIDTH = 140;
       const TOP_LEGEND_HEIGHT = 70;
       const RANKING_VIS_WIDHT = WIDTH - LEFT_LEGEND_WIDTH;
