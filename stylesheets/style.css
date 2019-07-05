@@ -27,14 +27,14 @@ body {
 
 /* sections */
 .section {
-  padding: 16px;
+  padding: 8px 16px 4px 16px;
   position: absolute;
 }
 
 .section__left {
   left: 0;
   /* 
-  ** 1520px == 240px (Names) + 1280px (Visualizaion)
+  ** 1520px == 140px (Names) + 1380px (Visualizaion)
   ** Ranking & Confusion 
   */
   width: 1520px;
@@ -73,8 +73,8 @@ body {
 /* Items */
 .title {
   vertical-align: super;
-  height: 36px;
-  font-size: 24px;
+  height: 32px;
+  font-size: 28px;
   font-weight: 600;
 }
 
@@ -82,6 +82,6 @@ body {
 svg {
   background: #dfe;
   width: 100%;
-  height: calc(100% - 36px);
+  height: calc(100% - 32px);
   /* 100% - title.height*/
 }
