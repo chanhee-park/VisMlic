@@ -32,6 +32,7 @@ const app = new Vue({
 
   watch: {
     models: function (newModels) {
+      VisUtil.removeSvg('ranking');
       this.visualizeRanking(newModels);
       this.selectedModel = null;
     },
@@ -78,6 +79,7 @@ const app = new Vue({
      */
     visualizeRanking: function (models) {
       // TODO: 랭킹 시각화 하기 
+      // 필요한 함수는 vis.ranking에 만들어서 사용.
       console.log('=> 랭킹 시각화를 생성합니다. visualizeRanking()');
       console.log(models);
 
