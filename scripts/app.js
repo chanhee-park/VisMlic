@@ -4,7 +4,8 @@ var app = new Vue({
     title: 'VisMLCV',
     sections: {
       ranking: {
-        title: 'Ranking'
+        title: 'Ranking',
+        sort_options: ['recall', 'presicion'],
       },
       confusion: {
         title: 'Confusion Matrix'
@@ -16,5 +17,13 @@ var app = new Vue({
         title: 'Instance Analysis'
       },
     }
+  },
+  methods: {
+    visualizeRanking: () => {
+      console.log('visualize ranking')
+    }
+  },
+  mounted () {
+    this.visualizeRanking();
   }
 })

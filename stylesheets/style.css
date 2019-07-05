@@ -1,6 +1,7 @@
 * {
   box-sizing: border-box;
   font-family: 'Roboto', sans-serif !important;
+  font-size: 16px;
 }
 
 body {
@@ -28,8 +29,7 @@ body {
 /* sections */
 
 .section {
-  padding: 12px;
-  border: 1px solid #aaa;
+  padding: 16px;
   position: absolute;
 }
 
@@ -49,6 +49,7 @@ body {
   ** Square 2d projection & Instances
   */
   width: calc(1920px - 1520px);
+  border-left: 1px solid #ccc;
 }
 
 .section__top {
@@ -58,6 +59,7 @@ body {
   ** Ranking & Square 2d projection 
   */
   height: 420px;
+
 }
 
 .section__bottom {
@@ -67,4 +69,21 @@ body {
   ** Confusion & Instances 
   */
   height: calc(1360px - 420px);
+  border-top: 1px solid #ccc;
+}
+
+/* Items */
+.title {
+  vertical-align: super;
+  height: 36px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* SVG */
+svg {
+  background: #dfe;
+  width: 100%;
+  height: calc(100% - 36px);
+  /* 100% - title.height*/
 }
