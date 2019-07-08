@@ -31,6 +31,7 @@ const app = new Vue({
     // models for visualization 
     models: {},
     selectedModel: {},
+    rankingCriteria : 'recall'
   },
 
   watch: {
@@ -116,8 +117,8 @@ const app = new Vue({
         { x: WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
 
       // => Draw class legend (Top)
-      const classLegendTexts = ['Accuracy', ...classNames];
-      _.forEach(classLegendTexts, (text, i) => {
+      const columnLegends = ['Accuracy', ...classNames];
+      _.forEach(columnLegends, (text, i) => {
         const x = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
         const y = TOP_LEGEND_HEIGHT - 5;
         VisUtil.text(root, text, { x, y , baseline: 'ideographic' });
@@ -133,6 +134,8 @@ const app = new Vue({
         VisUtil.text(root, modelName, { x: 20, y: y_text, anchor: 'start' });
       });
 
+      // Get Ranking Info.
+      const ranking = VisRanking.getRankingBy(models, this.rankingCriteria, classNames);
     }
   },
 
