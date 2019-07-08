@@ -63,8 +63,8 @@ const VisUtil = {
   },
 
   sortSvgObjs: (svg) => {
-    svg.selectAll('circle').raise();
     svg.selectAll('text').raise();
+    svg.selectAll('circle').raise();
   }
 
 }
