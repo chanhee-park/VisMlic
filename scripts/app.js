@@ -31,7 +31,7 @@ const app = new Vue({
     // models for visualization 
     models: {},
     selectedModel: {},
-    rankingCriteria : 'recall'
+    rankingCriteria: 'recall'
   },
 
   watch: {
@@ -92,7 +92,7 @@ const app = new Vue({
       // TODO: 랭킹 시각화 하기 
       // 필요한 함수는 vis.ranking에 만들어서 사용.
       console.log('=> 랭킹 시각화를 생성합니다. visualizeRanking()');
-      console.log({dataName, models});
+      console.log({ dataName, models });
 
       // Set data infomaition
       const classNames = this.dataInfo[dataName].classNames;
@@ -121,7 +121,7 @@ const app = new Vue({
       _.forEach(columnLegends, (text, i) => {
         const x = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
         const y = TOP_LEGEND_HEIGHT - 5;
-        VisUtil.text(root, text, { x, y , baseline: 'ideographic' });
+        VisUtil.text(root, text, { x, y, baseline: 'ideographic' });
       });
 
       // => Draw model legend (Left)
@@ -135,11 +135,25 @@ const app = new Vue({
       });
 
       // Get Ranking Info.
-      const ranking = VisRanking.getRankingBy(models, this.rankingCriteria, classNames);
+      const rankingByClass = VisRanking.getRankingBy(models, this.rankingCriteria, classNames);
+
+      // Visualize Ranking Info.
+      _.forEach(modelNames, (modelName, yi) => {
+        const line = [];
+        _.forEach(classNames, (className, xi)=>{
+          const rank = rankingByClass[className].indexOf(modelName);
+          const x = LEFT_LEGEND_WIDTH + (xi+1) * CELL_WIDTH + CELL_WIDTH / 2;
+          const y = TOP_LEGEND_HEIGHT + rank * CELL_HEIGHT;
+          const fill = Constants.colors[modelName];
+          VisUtil.rect(root, { x: x, y: y, w: CELL_WIDTH, h: 20, fill});
+
+        })
+      })
+      
     }
   },
 
-  async mounted () {
+  async mounted() {
     // set model prediction result data
     this.selecteddata = this.dataNames[0]; // minst
   },
