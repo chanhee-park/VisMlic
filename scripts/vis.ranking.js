@@ -39,7 +39,7 @@ const VisRanking = new function () {
       performances[modelName]['accuracy'] = model.performance.accuracy
     });
     return performances;
-  }
+  };
 
   /**
    * 하나의 모델과 성능 기준, 그리고 클래스 이름들을 입력받는다.
@@ -55,8 +55,25 @@ const VisRanking = new function () {
       filterd[c] = performance[c];
     })
     return filterd;
+  };
+
+  /**
+   * 퍼포먼스를 입력받아 랭킹 라인에 그릴 원의 반지름을 반환한다.   
+   * 퍼포먼스는 0~100 사이의 값(확률 값)이다. 
+   */
+  this.getRadius = (performance, maxR, minR, maxVal, minVal) => {
+    return (maxR - minR) * (performance - minVal) / (maxVal - minVal) + minR;
   }
 
+  /**
+   * 퍼포먼스를 입력받아 히트맵에 사용할 컬러를 반환한다.
+   * 퍼포먼스는 0~100 사이의 값(확률 값)이다. 
+   */
+  this.getPerformanceColor = (performance) => {
+    const regular = (performance - 50);
+    const c = regular / 50 * 255;
+    return `rgb(${c}, ${c}, ${c})`;
+  }
   return this;
 }
 

@@ -89,7 +89,6 @@ const app = new Vue({
      * @param {*} models 
      */
     visualizeRanking: function (models, dataName) {
-      // TODO: 랭킹 시각화 하기 
       // 필요한 함수는 vis.ranking에 만들어서 사용.
       console.log('=> 랭킹 시각화를 생성합니다. visualizeRanking()');
       console.log({ dataName, models });
@@ -104,13 +103,14 @@ const app = new Vue({
       // Set width & height
       const WIDTH = 1504;
       const HEIGHT = 388;
-      const LEFT_LEGEND_WIDTH = 150;
+      const LEFT_LEGEND_WIDTH = 120;
       const TOP_LEGEND_HEIGHT = 70;
       const RANKING_VIS_WIDHT = WIDTH - LEFT_LEGEND_WIDTH;
       const RANKING_VIS_HEIGHT = HEIGHT - TOP_LEGEND_HEIGHT;
       const NUM_OF_CELL = classNames.length + 1;  // Class Cells + An Accuracy Cell
       const CELL_WIDTH = RANKING_VIS_WIDHT / NUM_OF_CELL;
       const CELL_HEIGHT = RANKING_VIS_HEIGHT / modelNames.length;
+      const RANKING_LINE_WIDTH = CELL_HEIGHT * 0.3;
 
       // Draw legend
       VisUtil.text(root, 'Actual Classes',
@@ -139,17 +139,42 @@ const app = new Vue({
 
       // Visualize Ranking Info.
       _.forEach(modelNames, (modelName, yi) => {
-        const line = [];
-        _.forEach(classNames, (className, xi)=>{
-          const rank = rankingByClass[className].indexOf(modelName);
-          const x = LEFT_LEGEND_WIDTH + (xi+1) * CELL_WIDTH + CELL_WIDTH / 2;
-          const y = TOP_LEGEND_HEIGHT + rank * CELL_HEIGHT;
-          const fill = Constants.colors[modelName];
-          VisUtil.rect(root, { x: x, y: y, w: CELL_WIDTH, h: 20, fill});
+        const modelColor = Constants.colors[modelName];
+        let x = LEFT_LEGEND_WIDTH;
+        let y = TOP_LEGEND_HEIGHT + yi * CELL_HEIGHT + CELL_HEIGHT / 2; // for accuracy
+        let performance = Math.floor(models[modelName].performance.accuracy * 100);
+        let r = VisRanking.getRadius(performance, CELL_HEIGHT / 2, 10, 100, 80);
+        let heatRgb = VisRanking.getPerformanceColor(performance);
+        console.log(heatRgb)
 
-        })
-      })
-      
+        VisUtil.circle(root, { x: x + CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb });
+        VisUtil.text(root, performance, { x: x + CELL_WIDTH / 2, y });
+        let pathData = [
+          { x: LEFT_LEGEND_WIDTH + CELL_WIDTH * 0.5, y },
+          { x: LEFT_LEGEND_WIDTH + CELL_WIDTH * 0.8, y }
+        ];
+
+        _.forEach(classNames, (className, xi) => {
+          const rank = rankingByClass[className].indexOf(modelName);
+          performance = Math.floor(models[modelName].performance[this.rankingCriteria][className] * 100);
+          x = LEFT_LEGEND_WIDTH + (xi + 1) * CELL_WIDTH;
+          y = TOP_LEGEND_HEIGHT + rank * CELL_HEIGHT + CELL_HEIGHT / 2;
+          r = VisRanking.getRadius(performance, CELL_HEIGHT / 2, 10, 100, 80);
+          heatRgb = VisRanking.getPerformanceColor(performance);
+          VisUtil.circle(root, { x: x + CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb })
+          VisUtil.text(root, performance, { x: x + CELL_WIDTH / 2, y })
+          pathData = [
+            ...pathData,
+            { x: x + CELL_WIDTH * 0.2, y },
+            { x: x + CELL_WIDTH * 0.8, y }
+          ];
+        });
+        VisUtil.path(root, pathData, { stroke: modelColor, width: RANKING_LINE_WIDTH })
+      });
+
+      // TODO: 랭킹라인 하이라이트 기능 개발 
+
+      VisUtil.sortSvgObjs(root);
     }
   },
 
