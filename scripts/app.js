@@ -91,7 +91,7 @@ const app = new Vue({
       // TODO: 랭킹 시각화 하기 
       // 필요한 함수는 vis.ranking에 만들어서 사용.
       console.log('=> 랭킹 시각화를 생성합니다. visualizeRanking()');
-      console.log(dataName, models);
+      console.log({dataName, models});
 
       // Set data infomaition
       const classNames = this.dataInfo[dataName].classNames;
@@ -103,26 +103,27 @@ const app = new Vue({
       // Set width & height
       const WIDTH = 1504;
       const HEIGHT = 388;
-      const LEFT_LEGEND_WIDTH = 120;
+      const LEFT_LEGEND_WIDTH = 150;
       const TOP_LEGEND_HEIGHT = 70;
       const RANKING_VIS_WIDHT = WIDTH - LEFT_LEGEND_WIDTH;
       const RANKING_VIS_HEIGHT = HEIGHT - TOP_LEGEND_HEIGHT;
-      const CELL_WIDTH = RANKING_VIS_WIDHT / classNames.length;
+      const NUM_OF_CELL = classNames.length + 1;  // Class Cells + An Accuracy Cell
+      const CELL_WIDTH = RANKING_VIS_WIDHT / NUM_OF_CELL;
       const CELL_HEIGHT = RANKING_VIS_HEIGHT / modelNames.length;
-
-      // TODO: 평균 성능 칸 만들기 : 위에 넓이 변수도 추가해서 가독성도 챙기자. 수정하기 훨 쉬워진다.
 
       // Draw legend
       VisUtil.text(root, 'Actual Classes',
         { x: WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
 
-      // => Draw class lagend (Top)
-      _.forEach(classNames, (className, i) => {
-        const x_text = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
-        VisUtil.text(root, className, { x: x_text, y: TOP_LEGEND_HEIGHT - 5, baseline: 'ideographic' });
+      // => Draw class legend (Top)
+      const classLegendTexts = ['Accuracy', ...classNames];
+      _.forEach(classLegendTexts, (text, i) => {
+        const x = LEFT_LEGEND_WIDTH + i * CELL_WIDTH + CELL_WIDTH / 2;
+        const y = TOP_LEGEND_HEIGHT - 5;
+        VisUtil.text(root, text, { x, y , baseline: 'ideographic' });
       });
 
-      // => Draw model lagend (Left)
+      // => Draw model legend (Left)
       _.forEach(modelNames, (modelName, i) => {
         const y = TOP_LEGEND_HEIGHT + i * CELL_HEIGHT;
         if (i % 2 === 0) {
