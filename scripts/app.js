@@ -1,36 +1,33 @@
 const app = new Vue({
   el: '#app',
-
   data: {
     title: 'VisMLCV',
-    sections: {
-      ranking: {
-        title: 'Ranking & Confusion Matrix',
-        sorting_options: ['recall', 'presicion'],
-        WIDTH: 1504,
-        HEIGHT: 368,
-        LEFT_LEGEND_WIDTH: 120,
-        TOP_LEGEND_HEIGHT: 70,
-        RANKING_VIS_WIDHT: 1504 - 120,  // WIDTH - LEFT_LEGEND_WIDTH,
-        RANKING_VIS_HEIGHT: 368 - 70,   // HEIGHT - TOP_LEGEND_HEIGHT,
-        NUM_OF_COLUMNS: null,           // Set when data is loaded.
-        CELL_WIDTH: null,
-        CELL_HEIGHT: null,
-        RANKING_LINE_WIDTH: null,
-        HIGHLIGHT_RANKING_LINE_WIDTH: null,
-      },
-      confusion: {
-        title: ''
-      },
-      projection: {
-        title: '2D Projection'
-      },
-      instances: {
-        title: 'Instances'
-      },
+    // app.data -> sections
+    s_ranking: {
+      title: 'Ranking & Confusion Matrix',
+      sorting_options: ['recall', 'presicion'],
+      WIDTH: 1504,
+      HEIGHT: 368,
+      LEFT_LEGEND_WIDTH: 120,
+      TOP_LEGEND_HEIGHT: 70,
+      RANKING_VIS_WIDHT: 1504 - 120,  // WIDTH - LEFT_LEGEND_WIDTH,
+      RANKING_VIS_HEIGHT: 368 - 70,   // HEIGHT - TOP_LEGEND_HEIGHT,
+      NUM_OF_COLUMNS: null,           // Set when data is loaded.
+      CELL_WIDTH: null,
+      CELL_HEIGHT: null,
+      RANKING_LINE_WIDTH: null,
+      HIGHLIGHT_RANKING_LINE_WIDTH: null,
     },
-
-    // dataset
+    s_confusion: {
+      title: ''
+    },
+    s_projection: {
+      title: '2D Projection'
+    },
+    s_instances: {
+      title: 'Instances'
+    },
+    // app.data -> dataset
     selecteddata: '',
     dataNames: ['mnist'],
     dataInfo: {
@@ -40,35 +37,11 @@ const app = new Vue({
         modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
       }
     },
-
-    // models for visualization 
+    // app.data -> models for visualization
     models: {},
     selectedModelName: '',
     rankingCriteria: 'recall'
   },
-
-  watch: {
-    selecteddata: async function (newdata) {
-      console.log(`모델 예측 데이터 ${{ newdata }}가 로드되었습니다.`)
-      this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
-    },
-    models: function (newModels) {
-      VisUtil.removeSvg('ranking');
-      this.visualizeRanking(newModels, this.selecteddata);
-      this.selectedModelName = null;
-    },
-    selectedModelName: function (newModelName) {
-      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`)
-      // TODO: updates confusion and projection.
-      if (_.isNil(newModelName)) {
-        // remove 
-        return;
-      } else {
-        // update
-      }
-    }
-  },
-
   methods: {
     /*-------------------------------- D A T A --------------------------------*/
     /**
@@ -120,7 +93,7 @@ const app = new Vue({
 
       VisUtil.sortSvgObjs(rankingSvg, ['circle', 'text']);    // Sort visual elements
 
-      this.addEventRanking(rankingSvg, modelNames);                       // Add event listners
+      this.addEventRanking(rankingSvg, modelNames);           // Add event listners
     },
     /**
      * 모델들과 성능 기준을 입력받아 클래스 별 모델별 성능 순위 배열을 반환한다.
@@ -175,104 +148,109 @@ const app = new Vue({
       })
       return filterd;
     },
-
+    // 영역 상단에 클래스명 레전드를 그린다.
     drawRakingLegendTop: function (svg, classNames) {
       VisUtil.text(svg, 'Actual Classes',
-        { x: this.sections.ranking.WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
+        { x: this.s_ranking.WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
       const columnLegends = ['Accuracy', ...classNames];
       _.forEach(columnLegends, (text, i) => {
-        const x = this.sections.ranking.LEFT_LEGEND_WIDTH + i * this.sections.ranking.CELL_WIDTH + this.sections.ranking.CELL_WIDTH / 2;
-        const y = this.sections.ranking.TOP_LEGEND_HEIGHT - 5;
+        const x = this.s_ranking.LEFT_LEGEND_WIDTH + i * this.s_ranking.CELL_WIDTH + this.s_ranking.CELL_WIDTH / 2;
+        const y = this.s_ranking.TOP_LEGEND_HEIGHT - 5;
         VisUtil.text(svg, text, { x, y, baseline: 'ideographic' });
       });
     },
-
+    // 영역 내에 모델명 레전드를 그린다. 홀 수 열에는 연한 백그라운드를 표시하여 가독성을 높인다.
     drawRakingLegendLeft: function (svg, modelNames) {
       _.forEach(modelNames, (modelName, i) => {
-        const y = this.sections.ranking.TOP_LEGEND_HEIGHT + i * this.sections.ranking.CELL_HEIGHT;
+        const y = this.s_ranking.TOP_LEGEND_HEIGHT + i * this.s_ranking.CELL_HEIGHT;
         const background = (i % 2 === 0) ? '#f3f3f3' : '#ffffff';
-        VisUtil.rect(svg, { y: y, w: this.sections.ranking.WIDTH, h: this.sections.ranking.CELL_HEIGHT, fill: background });
+        VisUtil.rect(svg, {
+          y: y,
+          w: this.s_ranking.WIDTH,
+          h: this.s_ranking.CELL_HEIGHT,
+          fill: background
+        });
         // for higlighting
         VisUtil.rect(svg, {
-          y: y + (this.sections.ranking.CELL_HEIGHT - 30) / 2,
-          w: this.sections.ranking.LEFT_LEGEND_WIDTH,
+          y: y + (this.s_ranking.CELL_HEIGHT - 30) / 2,
+          w: this.s_ranking.LEFT_LEGEND_WIDTH,
           h: 30,
           fill: background,
           class: `ranking-${modelName}`
         });
-        const y_text = y + this.sections.ranking.CELL_HEIGHT / 2;
+        const y_text = y + this.s_ranking.CELL_HEIGHT / 2;
         VisUtil.text(svg, modelName, {
           x: 20, y: y_text, anchor: 'start', class: `ranking-${modelName}`
         });
       });
     },
-
+    // set element's size
     setRankingSectionSize: function (modelNames, classNames) {
-      this.sections.ranking.NUM_OF_COLUMNS = classNames.length + 1;  // Class Cells + An Accuracy Cell
-      this.sections.ranking.CELL_WIDTH = this.sections.ranking.RANKING_VIS_WIDHT / this.sections.ranking.NUM_OF_COLUMNS;
-      this.sections.ranking.CELL_HEIGHT = this.sections.ranking.RANKING_VIS_HEIGHT / modelNames.length;
-      this.sections.ranking.RANKING_LINE_WIDTH = this.sections.ranking.CELL_HEIGHT * 0.3;
-      this.sections.ranking.HIGHLIGHT_RANKING_LINE_WIDTH = this.sections.ranking.CELL_HEIGHT * 0.7;
+      this.s_ranking.NUM_OF_COLUMNS = classNames.length + 1;  // Class Cells + An Accuracy Cell
+      this.s_ranking.CELL_WIDTH = this.s_ranking.RANKING_VIS_WIDHT / this.s_ranking.NUM_OF_COLUMNS;
+      this.s_ranking.CELL_HEIGHT = this.s_ranking.RANKING_VIS_HEIGHT / modelNames.length;
+      this.s_ranking.RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.3;
+      this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.7;
     },
-
+    // draw ranking lines 
     drawRankingLines: function (svg, rankingByClass, models, classNames) {
       const modelNames = _.keys(models);
       _.forEach(modelNames, (modelName, yi) => {
         const modelColor = Constants.colors[modelName];
-        let x = this.sections.ranking.LEFT_LEGEND_WIDTH;
-        let y = this.sections.ranking.TOP_LEGEND_HEIGHT + yi * this.sections.ranking.CELL_HEIGHT + this.sections.ranking.CELL_HEIGHT / 2; // for accuracy
+        let x = this.s_ranking.LEFT_LEGEND_WIDTH;
+        let y = this.s_ranking.TOP_LEGEND_HEIGHT + yi * this.s_ranking.CELL_HEIGHT + this.s_ranking.CELL_HEIGHT / 2; // for accuracy
         let performance = Math.floor(models[modelName].performance.accuracy * 100);
-        let r = this.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
+        let r = this.getRadius(performance, this.s_ranking.CELL_HEIGHT / 2, 10, 100, 80);
         let heatRgb = this.getPerformanceColor(performance);
 
         // Whole Accuracy
         VisUtil.circle(svg, {
-          x: x + this.sections.ranking.CELL_WIDTH / 2,
+          x: x + this.s_ranking.CELL_WIDTH / 2,
           y: y,
           r,
           stroke: modelColor,
           fill: heatRgb,
           class: `ranking- ${modelName}`
         });
-        VisUtil.text(svg, performance, { x: x + this.sections.ranking.CELL_WIDTH / 2, y });
+        VisUtil.text(svg, performance, { x: x + this.s_ranking.CELL_WIDTH / 2, y });
         VisUtil.line(svg, {
           x1: 0,
-          x2: this.sections.ranking.LEFT_LEGEND_WIDTH + this.sections.ranking.CELL_WIDTH / 2,
+          x2: this.s_ranking.LEFT_LEGEND_WIDTH + this.s_ranking.CELL_WIDTH / 2,
           y1: y,
           y2: y,
           stroke: Constants.colors[modelName],
           opacity: 0,
-          width: this.sections.ranking.HIGHLIGHT_RANKING_LINE_WIDTH,
+          width: this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH,
           class: `ranking-${modelName}`
         })
         let pathData = [
-          { x: this.sections.ranking.LEFT_LEGEND_WIDTH + this.sections.ranking.CELL_WIDTH * 0.5, y },
-          { x: this.sections.ranking.LEFT_LEGEND_WIDTH + this.sections.ranking.CELL_WIDTH * 0.8, y }
+          { x: this.s_ranking.LEFT_LEGEND_WIDTH + this.s_ranking.CELL_WIDTH * 0.5, y },
+          { x: this.s_ranking.LEFT_LEGEND_WIDTH + this.s_ranking.CELL_WIDTH * 0.8, y }
         ];
 
         // Recalls or Precisions of each classes
         _.forEach(classNames, (className, xi) => {
           const rank = rankingByClass[className].indexOf(modelName);
           performance = Math.floor(models[modelName].performance[this.rankingCriteria][className] * 100);
-          x = this.sections.ranking.LEFT_LEGEND_WIDTH + (xi + 1) * this.sections.ranking.CELL_WIDTH;
-          y = this.sections.ranking.TOP_LEGEND_HEIGHT + rank * this.sections.ranking.CELL_HEIGHT + this.sections.ranking.CELL_HEIGHT / 2;
-          r = this.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
+          x = this.s_ranking.LEFT_LEGEND_WIDTH + (xi + 1) * this.s_ranking.CELL_WIDTH;
+          y = this.s_ranking.TOP_LEGEND_HEIGHT + rank * this.s_ranking.CELL_HEIGHT + this.s_ranking.CELL_HEIGHT / 2;
+          r = this.getRadius(performance, this.s_ranking.CELL_HEIGHT / 2, 10, 100, 80);
           heatRgb = this.getPerformanceColor(performance);
           VisUtil.circle(svg, {
-            x: x + this.sections.ranking.CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb, class: `ranking-${modelName}`
+            x: x + this.s_ranking.CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb, class: `ranking-${modelName}`
           })
           VisUtil.text(svg, performance, {
-            x: x + this.sections.ranking.CELL_WIDTH / 2, y, class: `ranking-${modelName}`
+            x: x + this.s_ranking.CELL_WIDTH / 2, y, class: `ranking-${modelName}`
           })
           pathData = [
             ...pathData,
-            { x: x + this.sections.ranking.CELL_WIDTH * 0.2, y },
-            { x: x + this.sections.ranking.CELL_WIDTH * 0.8, y }
+            { x: x + this.s_ranking.CELL_WIDTH * 0.2, y },
+            { x: x + this.s_ranking.CELL_WIDTH * 0.8, y }
           ];
         });
         VisUtil.path(svg, pathData, {
           stroke: modelColor,
-          width: this.sections.ranking.RANKING_LINE_WIDTH,
+          width: this.s_ranking.RANKING_LINE_WIDTH,
           class: `ranking-${modelName}`
         });
       });
@@ -300,16 +278,15 @@ const app = new Vue({
       this.selectedModelName = modelName;
       this.deHighlightlModelList(svg, _.keys(this.models));
       this.highlightModel(svg, this.selectedModelName);
-      // TODO: 컨퓨전 매트릭스 업데이트
     },
     highlightModel: function (svg, modelName) {
-      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.sections.ranking.HIGHLIGHT_RANKING_LINE_WIDTH);
+      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH);
       svg.selectAll(`line.ranking-${modelName}`).style('stroke-opacity', 1);
       svg.selectAll(`text.ranking-${modelName}`).style('fill', '#000000');
       svg.selectAll(`text.ranking-${modelName}`).style('font-weight', '900');
     },
     deHighlightModel: function (svg, modelName) {
-      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.sections.ranking.RANKING_LINE_WIDTH);
+      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.s_ranking.RANKING_LINE_WIDTH);
       svg.selectAll(`line.ranking-${modelName}`).style('stroke-opacity', 0);
       svg.selectAll(`text.ranking-${modelName}`).style('fill', '#555555');
       svg.selectAll(`text.ranking-${modelName}`).style('font-weight', '600');
@@ -338,8 +315,31 @@ const app = new Vue({
       return `rgb(${c}, ${c}, ${c})`;
     },
     /*-------------------------------- R A N K I N G --------------------------------*/
+    /*-------------------------------- C O N F U S I O N --------------------------------*/
+    // TODO: 선택된 모델에대한 컨퓨전 매트릭스 그리기
+    /*-------------------------------- C O N F U S I O N --------------------------------*/
   },
-
+  watch: {
+    selecteddata: async function (newdata) {
+      console.log(`모델 예측 데이터 ${{ newdata }}가 로드되었습니다.`)
+      this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
+    },
+    models: function (newModels) {
+      VisUtil.removeSvg('ranking');
+      this.visualizeRanking(newModels, this.selecteddata);
+      this.selectedModelName = null;
+    },
+    selectedModelName: function (newModelName) {
+      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`)
+      // TODO: updates confusion and projection.
+      if (_.isNil(newModelName)) {
+        // remove 
+        return;
+      } else {
+        // update
+      }
+    }
+  },
   async mounted () {
     // set model prediction result data
     this.selecteddata = this.dataNames[0]; // minst
