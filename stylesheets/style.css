@@ -20,7 +20,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  margin: auto;
+  margin: auto; /* uncomment this line */
   background: #fff;
   box-shadow: 2px 2px 10px 1px rgba(119, 119, 119, 1);
 }
@@ -80,7 +80,7 @@ body {
 
 /* SVG */
 svg {
-  background: #dfe;
+  /* background: #dfe; */
   width: 100%;
   height: calc(100% - 28px);
   /* 100% - title.height*/
