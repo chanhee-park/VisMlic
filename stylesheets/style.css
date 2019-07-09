@@ -20,7 +20,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  margin: auto; /* uncomment this line */
+  /* margin: auto; uncomment this line */
   background: #fff;
   box-shadow: 2px 2px 10px 1px rgba(119, 119, 119, 1);
 }
@@ -53,20 +53,20 @@ body {
 .section__top {
   top: 0;
   /* 
-  ** 420px == 20px (Names) + 400px (Visualization)
+  ** 400px == 20px (Names) + 380px (Visualization)
   ** Ranking & Square 2d projection 
   */
-  height: 420px;
+  height: 400px;
 
 }
 
 .section__bottom {
   bottom: 0;
   /* 
-  ** 940px == 1360px (App's Height) - 420px (Top's Height) 
+  ** 980px == 1360px (App's Height) - 400px (Top's Height) 
   ** Confusion & Instances 
   */
-  height: calc(1360px - 420px);
+  height: calc(1360px - 400px);
   border-top: 1px solid #ccc;
 }
 
