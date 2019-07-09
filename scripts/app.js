@@ -49,7 +49,7 @@ const app = new Vue({
 
   watch: {
     selecteddata: async function (newdata) {
-      console.log(`모델 예측 데이터(${newdata})가 로드되었습니다.`)
+      console.log(`모델 예측 데이터 ${{ newdata }}가 로드되었습니다.`)
       this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
     },
     models: function (newModels) {
@@ -58,6 +58,7 @@ const app = new Vue({
       this.selectedModelName = null;
     },
     selectedModelName: function (newModelName) {
+      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`)
       // TODO: updates confusion and projection.
       if (_.isNil(newModelName)) {
         // remove 
@@ -69,6 +70,7 @@ const app = new Vue({
   },
 
   methods: {
+    /*-------------------------------- D A T A --------------------------------*/
     /**
      * 모델 이름들과 데이터 셋 이름을 입력받아 모델 예측 결과들을 반환한다.
      * @param {*} modelNames 
@@ -93,7 +95,7 @@ const app = new Vue({
       const response = await fetch(dirname + filename);
       return await response.json();
     },
-
+    /*-------------------------------- D A T A --------------------------------*/
     /*-------------------------------- R A N K I N G --------------------------------*/
     /**
      * 모델 예측 결과들을 입력 받아 랭킹을 시각화 한다. 
@@ -101,28 +103,24 @@ const app = new Vue({
      */
     visualizeRanking: function (models, dataName) {
       console.log(`=> 랭킹 시각화를 생성합니다. visualizeRanking(${{ dataName, models }})`);
-      // Set data infomaition
-      const classNames = this.dataInfo[dataName].classNames;
+
+      const classNames = this.dataInfo[dataName].classNames;  // Set data infomaition
       const modelNames = _.keys(models);
-      // Set size of visual elements
-      this.setRankingSectionSize(modelNames, classNames);
-      // Set svg root
-      const root = d3.select('#vis-ranking');
+      const rankingSvg = d3.select('#vis-ranking');           // Set svg
 
-      // Draw legend
-      this.drawRakingLegendTop(root, classNames);
-      this.drawRakingLegendLeft(root, modelNames);
+      this.setRankingSectionSize(modelNames, classNames);     // Set size of visual elements
 
-      // Get ranking Info.
-      const rankingByClass = this.getRankingBy(models, this.rankingCriteria, classNames);
-      // Visualize ranking Info.
-      this.drawRankingLines(root, rankingByClass, models, classNames);
+      this.drawRakingLegendTop(rankingSvg, classNames);       // Draw legend - top
+      this.drawRakingLegendLeft(rankingSvg, modelNames);      // Draw legend - left
 
-      // Sort visual elements
-      VisUtil.sortSvgObjs(root, ['circle', 'text']);
+      const rankingByClass = this.getRankingBy(
+        models, this.rankingCriteria, classNames);            // Get ranking Info.
+      this.drawRankingLines(
+        rankingSvg, rankingByClass, models, classNames);      // Draw ranking lines
 
-      // Add event listners
-      this.addEventRanking(modelNames);
+      VisUtil.sortSvgObjs(rankingSvg, ['circle', 'text']);    // Sort visual elements
+
+      this.addEventRanking(rankingSvg, modelNames);                       // Add event listners
     },
     /**
      * 모델들과 성능 기준을 입력받아 클래스 별 모델별 성능 순위 배열을 반환한다.
@@ -224,8 +222,8 @@ const app = new Vue({
         let x = this.sections.ranking.LEFT_LEGEND_WIDTH;
         let y = this.sections.ranking.TOP_LEGEND_HEIGHT + yi * this.sections.ranking.CELL_HEIGHT + this.sections.ranking.CELL_HEIGHT / 2; // for accuracy
         let performance = Math.floor(models[modelName].performance.accuracy * 100);
-        let r = VisRanking.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
-        let heatRgb = VisRanking.getPerformanceColor(performance);
+        let r = this.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
+        let heatRgb = this.getPerformanceColor(performance);
 
         // Whole Accuracy
         VisUtil.circle(svg, {
@@ -258,8 +256,8 @@ const app = new Vue({
           performance = Math.floor(models[modelName].performance[this.rankingCriteria][className] * 100);
           x = this.sections.ranking.LEFT_LEGEND_WIDTH + (xi + 1) * this.sections.ranking.CELL_WIDTH;
           y = this.sections.ranking.TOP_LEGEND_HEIGHT + rank * this.sections.ranking.CELL_HEIGHT + this.sections.ranking.CELL_HEIGHT / 2;
-          r = VisRanking.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
-          heatRgb = VisRanking.getPerformanceColor(performance);
+          r = this.getRadius(performance, this.sections.ranking.CELL_HEIGHT / 2, 10, 100, 80);
+          heatRgb = this.getPerformanceColor(performance);
           VisUtil.circle(svg, {
             x: x + this.sections.ranking.CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb, class: `ranking-${modelName}`
           })
@@ -281,12 +279,12 @@ const app = new Vue({
     },
 
     // Evnets for visual elements in ranking section.
-    addEventRanking: function (modelNames) {
+    addEventRanking: function (svg, modelNames) {
       _.forEach(modelNames, (modelName) => {
         d3.selectAll(`.ranking-${modelName}`)
-          .on('mouseover', () => this.mouseOverRanking(root, modelName))
-          .on('mouseout', () => this.mouseOutRanking(root, modelName))
-          .on('mousedown', () => this.mouseDownRanking(root, modelName));
+          .on('mouseover', () => this.mouseOverRanking(svg, modelName))
+          .on('mouseout', () => this.mouseOutRanking(svg, modelName))
+          .on('mousedown', () => this.mouseDownRanking(svg, modelName));
       })
     },
     mouseOverRanking: function (svg, modelName) {
@@ -318,7 +316,27 @@ const app = new Vue({
     },
     deHighlightlModelList: function (svg, modelNames) {
       _.forEach(modelNames, modelName => this.deHighlightModel(svg, modelName));
-    }
+    },
+    /**
+     * 퍼포먼스를 입력받아 랭킹 라인에 그릴 원의 반지름을 반환한다.   
+     * 퍼포먼스는 0~100 사이의 값(확률 값)이다. 
+     */
+    getRadius: function (performance, maxR, minR, maxVal, minVal) {
+      return (maxR - minR) * (performance - minVal) / (maxVal - minVal) + minR;
+    },
+    /**
+     * 퍼포먼스를 입력받아 히트맵에 사용할 컬러를 반환한다.
+     * 퍼포먼스는 0~100 사이의 값(확률 값)이다. 
+     */
+    getPerformanceColor: function (performance) {
+      // 0.5(black) ~ 0.98(white)
+      let rp = performance + 2;     // (0, 100) -> (2, 102)
+      rp = rp > 100 ? 100 : rp;     // (2, 102) -> (2, 100)
+      rp = (rp - 50) * 2;           // (2, 100) -> (-96, 100)
+      rp = rp < 0 ? 0 : rp;         // (-96, 100) -> (0, 100) 
+      const c = rp / 100 * 255;
+      return `rgb(${c}, ${c}, ${c})`;
+    },
     /*-------------------------------- R A N K I N G --------------------------------*/
   },
 
