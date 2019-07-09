@@ -6,7 +6,7 @@ const app = new Vue({
     sections: {
       ranking: {
         title: 'Ranking & Confusion Matrix',
-        sort_options: ['recall', 'presicion'],
+        sorting_options: ['recall', 'presicion'],
       },
       confusion: {
         title: ''
@@ -18,7 +18,8 @@ const app = new Vue({
         title: 'Instances'
       },
     },
-    // data
+
+    // dataset
     selecteddata: '',
     dataNames: ['mnist'],
     dataInfo: {
@@ -28,6 +29,7 @@ const app = new Vue({
         modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
       }
     },
+
     // models for visualization 
     models: {},
     selectedModel: {},
