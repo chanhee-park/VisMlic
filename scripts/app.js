@@ -73,7 +73,7 @@ const app = new Vue({
     },
   },
   methods: {
-    /*-------------------------------- D A T A --------------------------------*/
+    /*------------------------------------- D A T A -------------------------------------*/
     /**
      * 모델 이름들과 데이터 셋 이름을 입력받아 모델 예측 결과들을 반환한다.
      * @param {*} modelNames 
@@ -98,8 +98,8 @@ const app = new Vue({
       const response = await fetch(dirname + filename);
       return await response.json();
     },
-    /*-------------------------------- D A T A --------------------------------*/
-    /*-------------------------------- R A N K I N G --------------------------------*/
+    /*------------------------------------- D A T A -------------------------------------*/
+    /*---------------------------------- R A N K I N G ----------------------------------*/
     /**
      * 모델 예측 결과들을 입력 받아 랭킹을 시각화 한다. 
      * @param {*} models 
@@ -345,9 +345,8 @@ const app = new Vue({
       const c = rp / 100 * 255;
       return `rgb(${c}, ${c}, ${c})`;
     },
-    /*-------------------------------- R A N K I N G --------------------------------*/
+    /*---------------------------------- R A N K I N G ----------------------------------*/
     /*-------------------------------- C O N F U S I O N --------------------------------*/
-    // TODO: 선택된 모델에대한 컨퓨전 매트릭스 그리기
     visualizeConfusion: function (svg, modelName, dataName) {
       console.log(`=> 컨퓨전 매트릭스 시각화를 생성합니다. visualizeConfusion(${{ dataName, modelName }})`);
 
@@ -472,6 +471,12 @@ const app = new Vue({
       }
     }
     /*-------------------------------- C O N F U S I O N --------------------------------*/
+    /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
+    // TODO:  모델 재 개발 및 t-SNE 맵 시각화 개발
+    /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
+    /*-------------------------------- I N S T A N C E S --------------------------------*/
+    // TODO:  인스턴스 분석 뷰 개발 <= 랭킹과 매트릭스에 클릭 인터랙션 달기
+    /*-------------------------------- I N S T A N C E S --------------------------------*/
   },
   watch: {
     selecteddata: async function (newdata) {
@@ -506,15 +511,12 @@ const app = new Vue({
       this.selectedModelName = null;
     },
     selectedModelName: function (newModelName) {
-      if (!_.isNil(newModelName)) {
-        // update
-        console.log(`모델 ${newModelName}이(가) 선택되었습니다.`);
-        const confusionSvg = d3.select('#vis-confusion');
-        const dataName = this.selecteddata;
-        this.visualizeConfusion(confusionSvg, newModelName, dataName);
-      } else {
-        // remove
-      }
+      if (_.isNil(newModelName)) return;
+      // update
+      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`);
+      const confusionSvg = d3.select('#vis-confusion');
+      const dataName = this.selecteddata;
+      this.visualizeConfusion(confusionSvg, newModelName, dataName);
     }
   },
   async mounted () {
