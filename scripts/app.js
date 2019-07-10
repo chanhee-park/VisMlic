@@ -40,7 +40,22 @@ const app = new Vue({
     // app.data -> models for visualization
     models: {},
     selectedModelName: '',
-    rankingCriteria: 'recall'
+    rankingCriteria: 'recall',
+    // app.data -> visual element's features
+    font_size: {
+      default: '24px'
+    },
+
+    colors: {
+      'cnn': '#FD8D3C',
+      'nn_10-layers': '#3182BD',
+      'nn_5-layers': '#6BAED6',
+      'nn_3-layers': '#9ECAE1',
+      'slp': '#9E9AC8',
+      'rfc_50': '#30A354',
+      'rfc_25': '#74C476',
+      'rfc_10': '#A0D99B',
+    }
   },
   methods: {
     /*-------------------------------- D A T A --------------------------------*/
@@ -196,7 +211,7 @@ const app = new Vue({
     drawRankingLines: function (svg, rankingByClass, models, classNames) {
       const modelNames = _.keys(models);
       _.forEach(modelNames, (modelName, yi) => {
-        const modelColor = Constants.colors[modelName];
+        const modelColor = this.colors[modelName];
         let x = this.s_ranking.LEFT_LEGEND_WIDTH;
         let y = this.s_ranking.TOP_LEGEND_HEIGHT + yi * this.s_ranking.CELL_HEIGHT + this.s_ranking.CELL_HEIGHT / 2; // for accuracy
         let performance = Math.floor(models[modelName].performance.accuracy * 100);
@@ -218,7 +233,7 @@ const app = new Vue({
           x2: this.s_ranking.LEFT_LEGEND_WIDTH + this.s_ranking.CELL_WIDTH / 2,
           y1: y,
           y2: y,
-          stroke: Constants.colors[modelName],
+          stroke: this.colors[modelName],
           opacity: 0,
           width: this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH,
           class: `ranking-${modelName}`
