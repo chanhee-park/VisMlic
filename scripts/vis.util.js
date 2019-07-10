@@ -1,10 +1,10 @@
 const VisUtil = {
-  removeSvg: (selector) => {
+  emptySvg: (selector) => {
     d3.selectAll(`${selector} > *`).remove();
   },
-  removeSvgs: (selectors) => {
+  emptySvgs: (selectors) => {
     for (let selector of selectors) {
-      removeSvg(selector);
+      emptySvg(selector);
     }
   },
   text: (svg, str, attrs) => {
@@ -23,10 +23,10 @@ const VisUtil = {
   line: (svg, attrs) => {
     svg.append('line')
       .attrs({
-        x1: _.isNil(attrs.x1) ? 0 : attrs.x1,
-        x2: _.isNil(attrs.x2) ? 0 : attrs.x2,
+        x1: _.isNil(attrs.x1) ? 100 : attrs.x1,
+        x2: _.isNil(attrs.x2) ? 200 : attrs.x2,
         y1: _.isNil(attrs.y1) ? 100 : attrs.y1,
-        y2: _.isNil(attrs.y2) ? 100 : attrs.y2,
+        y2: _.isNil(attrs.y2) ? 200 : attrs.y2,
         stroke: _.isNil(attrs.stroke) ? '#ccc' : attrs.stroke,
         'stroke-width': _.isNil(attrs.width) ? '#ccc' : attrs.width,
         'stroke-opacity': _.isNil(attrs.opacity) ? 1 : attrs.opacity,

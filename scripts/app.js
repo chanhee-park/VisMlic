@@ -19,7 +19,16 @@ const app = new Vue({
       HIGHLIGHT_RANKING_LINE_WIDTH: null,
     },
     s_confusion: {
-      title: ''
+      title: 'Confusion Matrix',
+      WIDTH: 1504,
+      HEIGHT: 959,
+      LEFT_LEGEND_WIDTH: 120,
+      TOP_LEGEND_HEIGHT: 0,
+      CONFUSION_VIS_WIDHT: 1504 - 120,  // WIDTH - LEFT_LEGEND_WIDTH,
+      CONFUSION_VIS_HEIGHT: 959 - 0,    // HEIGHT - TOP_LEGEND_HEIGHT,
+      NUM_OF_COLUMNS: null,           // Set when data is loaded.
+      CELL_WIDTH: null,
+      CELL_HEIGHT: null,
     },
     s_projection: {
       title: '2D Projection'
@@ -45,7 +54,6 @@ const app = new Vue({
     font_size: {
       default: '24px'
     },
-
     colors: {
       'cnn': '#FD8D3C',
       'nn_10-layers': '#3182BD',
@@ -55,7 +63,12 @@ const app = new Vue({
       'rfc_50': '#30A354',
       'rfc_25': '#74C476',
       'rfc_10': '#A0D99B',
-    }
+      confusion_red: function (d) {
+        // d is between 0.0 ~ 1.0 (대부분 0.05 이하)
+        return `rgb(255, 0, 0, ${d * 10})`
+        // return d3.interpolateReds(d); // [0, 1]
+      },
+    },
   },
   methods: {
     /*-------------------------------- D A T A --------------------------------*/
@@ -89,26 +102,21 @@ const app = new Vue({
      * 모델 예측 결과들을 입력 받아 랭킹을 시각화 한다. 
      * @param {*} models 
      */
-    visualizeRanking: function (models, dataName) {
+    visualizeRanking: function (svg, models, dataName, criteria) {
       console.log(`=> 랭킹 시각화를 생성합니다. visualizeRanking(${{ dataName, models }})`);
-
-      const classNames = this.dataInfo[dataName].classNames;  // Set data infomaition
+      // Set data infomaition
+      const classNames = this.dataInfo[dataName].classNames;
       const modelNames = _.keys(models);
-      const rankingSvg = d3.select('#vis-ranking');           // Set svg
 
-      this.setRankingSectionSize(modelNames, classNames);     // Set size of visual elements
+      // Get ranking infomation & Draw ranking lines
+      const rankingInfo = this.getRankingBy(models, criteria, classNames);
+      this.drawRankingLines(svg, rankingInfo, models, classNames);
 
-      this.drawRakingLegendTop(rankingSvg, classNames);       // Draw legend - top
-      this.drawRakingLegendLeft(rankingSvg, modelNames);      // Draw legend - left
+      // Sort visual elements
+      VisUtil.sortSvgObjs(svg, ['circle', 'text']);
 
-      const rankingByClass = this.getRankingBy(
-        models, this.rankingCriteria, classNames);            // Get ranking Info.
-      this.drawRankingLines(
-        rankingSvg, rankingByClass, models, classNames);      // Draw ranking lines
-
-      VisUtil.sortSvgObjs(rankingSvg, ['circle', 'text']);    // Sort visual elements
-
-      this.addEventRanking(rankingSvg, modelNames);           // Add event listners
+      // Add event listners
+      this.addEventRanking(svg, modelNames);
     },
     /**
      * 모델들과 성능 기준을 입력받아 클래스 별 모델별 성능 순위 배열을 반환한다.
@@ -200,12 +208,16 @@ const app = new Vue({
       });
     },
     // set element's size
-    setRankingSectionSize: function (modelNames, classNames) {
+    setLeftSectionSize: function (modelNames, classNames) {
       this.s_ranking.NUM_OF_COLUMNS = classNames.length + 1;  // Class Cells + An Accuracy Cell
       this.s_ranking.CELL_WIDTH = this.s_ranking.RANKING_VIS_WIDHT / this.s_ranking.NUM_OF_COLUMNS;
       this.s_ranking.CELL_HEIGHT = this.s_ranking.RANKING_VIS_HEIGHT / modelNames.length;
       this.s_ranking.RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.3;
       this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.7;
+
+      this.s_confusion.NUM_OF_COLUMNS = classNames.length;
+      this.s_confusion.CELL_WIDTH = this.s_ranking.CELL_WIDTH;
+      this.s_confusion.CELL_HEIGHT = this.s_confusion.CONFUSION_VIS_HEIGHT / classNames.length;
     },
     // draw ranking lines 
     drawRankingLines: function (svg, rankingByClass, models, classNames) {
@@ -332,6 +344,77 @@ const app = new Vue({
     /*-------------------------------- R A N K I N G --------------------------------*/
     /*-------------------------------- C O N F U S I O N --------------------------------*/
     // TODO: 선택된 모델에대한 컨퓨전 매트릭스 그리기
+    visualizeConfusion: function (svg, modelName, dataName) {
+      console.log(`=> 컨퓨전 매트릭스 시각화를 생성합니다. visualizeConfusion(${{ dataName, modelName }})`);
+
+      // Set data infomaition
+      const classNames = this.dataInfo[dataName].classNames;
+      const predictResult = this.models[modelName].predict;
+
+      // Get confusion infomation & Draw it.
+      const confusionInfo = this.getConfusionBy(predictResult, classNames);
+      this.drawConfusionVis(svg, confusionInfo);
+
+
+      // const rankingByClass = this.getRankingBy(
+      //   models, this.rankingCriteria, classNames);            
+      // this.drawRankingLines(
+      //   rankingSvg, rankingByClass, models, classNames);      // Draw ranking lines
+
+      // VisUtil.sortSvgObjs(rankingSvg, ['circle', 'text']);    // Sort visual elements
+
+      // this.addEventRanking(rankingSvg, modelNames);           // Add event listners
+    },
+    drawConfusionAxis: function (svg, classNames) {
+      const total_h = this.s_confusion.HEIGHT;
+      const total_w = this.s_confusion.WIDTH;
+      const l_legend_w = this.s_confusion.LEFT_LEGEND_WIDTH;
+      const cell_w = this.s_confusion.CELL_WIDTH;
+      const cell_h = this.s_confusion.CELL_HEIGHT;
+      _.forEach(classNames, (className, idx) => {
+        const col_x = l_legend_w + cell_w + idx * cell_w;
+        const row_y = idx * cell_h;
+        VisUtil.line(svg, { x1: l_legend_w + cell_w, x2: total_w, y1: row_y, y2: row_y }); // 가로줄
+        VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });         // 세로줄
+      });
+    },
+    getConfusionBy: function (preds, classNames) {
+      const numOfClassElem = preds.length / classNames.length;
+      const matrix = this.getEmptyMatrix(classNames);
+      _.forEach(preds, (pred) => {
+        matrix[pred.real][pred.pred] += 1 / numOfClassElem;
+      });
+      return matrix;
+    },
+    getEmptyMatrix: function (classNames) {
+      const matrix = {};
+      _.forEach(classNames, (real) => {
+        matrix[real] = {};
+        _.forEach(classNames, (pred) => {
+          matrix[real][pred] = 0;
+        });
+      });
+      return matrix;
+    },
+    drawConfusionVis: function (svg, confusonMatrix) {
+      const classNames = _.keys(confusonMatrix);
+      const classLen = classNames.length;
+      const w = this.s_confusion.CELL_WIDTH;
+      const h = this.s_confusion.CELL_HEIGHT;
+      const x_start = this.s_confusion.LEFT_LEGEND_WIDTH + w;
+      for (let real = 0; real < classLen; real++) {
+        const x = x_start + real * w;
+        for (let pred = 0; pred < classLen; pred++) {
+          const y = pred * h;
+          const val = Math.floor(confusonMatrix[real][pred] * 1000) / 1000;
+          console.log(confusonMatrix[real][pred], val);
+          if (real === pred) continue;
+          VisUtil.rect(svg, { x, y, w, h, fill: this.colors.confusion_red(val) });
+          VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
+
+        }
+      }
+    },
     /*-------------------------------- C O N F U S I O N --------------------------------*/
   },
   watch: {
@@ -340,18 +423,41 @@ const app = new Vue({
       this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
     },
     models: function (newModels) {
-      VisUtil.removeSvg('ranking');
-      this.visualizeRanking(newModels, this.selecteddata);
+      if (_.isNil(this.selecteddata) || _.isNil(newModels)) return;
+      // Set & empty svg
+      const rankingSvg = d3.select('#vis-ranking');
+      const confusionSvg = d3.select('#vis-confusion');
+      VisUtil.emptySvg('#vis-ranking');
+      VisUtil.emptySvg('#vis-confusion');
+
+      // Set data infomaition
+      const dataName = this.selecteddata;
+      const classNames = this.dataInfo[dataName].classNames;
+      const modelNames = _.keys(newModels);
+
+      // Set size of visual elements
+      this.setLeftSectionSize(modelNames, classNames);
+
+      // Draw Legends & Axis
+      this.drawRakingLegendTop(rankingSvg, classNames);
+      this.drawRakingLegendLeft(rankingSvg, modelNames);
+      this.drawConfusionAxis(confusionSvg, classNames)
+
+      // Visualize
+      this.visualizeRanking(rankingSvg, newModels, dataName, this.rankingCriteria);
+
       this.selectedModelName = null;
     },
     selectedModelName: function (newModelName) {
-      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`)
-      // TODO: updates confusion and projection.
-      if (_.isNil(newModelName)) {
-        // remove 
-        return;
-      } else {
+      if (!_.isNil(newModelName)) {
         // update
+        console.log(`모델 ${newModelName}이(가) 선택되었습니다.`);
+        const confusionSvg = d3.select('#vis-confusion');
+        VisUtil.emptySvg('#vis-confusion');
+        const dataName = this.selecteddata;
+        this.visualizeConfusion(confusionSvg, newModelName, dataName);
+      } else {
+        // remove
       }
     }
   },
