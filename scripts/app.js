@@ -29,6 +29,8 @@ const app = new Vue({
       NUM_OF_COLUMNS: null,           // Set when data is loaded.
       CELL_WIDTH: null,
       CELL_HEIGHT: null,
+      IAMGE_WIDTH: null,
+      IMAGE_HEIGHT: null,
     },
     s_projection: {
       title: '2D Projection'
@@ -65,7 +67,7 @@ const app = new Vue({
       'rfc_10': '#A0D99B',
       confusion_red: function (d) {
         // d is between 0.0 ~ 1.0 (대부분 0.05 이하)
-        return `rgb(255, 0, 0, ${d * 10})`
+        return `rgb(255, 70, 70, ${d * 10})`
         // return d3.interpolateReds(d); // [0, 1]
       },
     },
@@ -218,6 +220,8 @@ const app = new Vue({
       this.s_confusion.NUM_OF_COLUMNS = classNames.length;
       this.s_confusion.CELL_WIDTH = this.s_ranking.CELL_WIDTH;
       this.s_confusion.CELL_HEIGHT = this.s_confusion.CONFUSION_VIS_HEIGHT / classNames.length;
+      this.s_confusion.IAMGE_WIDTH = this.s_ranking.CELL_WIDTH * 0.5;
+      this.s_confusion.IMAGE_HEIGHT = this.s_ranking.CELL_WIDTH * 0.5;
     },
     // draw ranking lines 
     drawRankingLines: function (svg, rankingByClass, models, classNames) {
@@ -353,16 +357,12 @@ const app = new Vue({
 
       // Get confusion infomation & Draw it.
       const confusionInfo = this.getConfusionBy(predictResult, classNames);
-      this.drawConfusionVis(svg, confusionInfo);
+      const repImageIdxs = this.getRepImageIdxs(predictResult, classNames);
+      this.drawConfusionMatrix(svg, confusionInfo);
+      this.drawConfusionRepImages(svg, dataName, repImageIdxs);
 
-
-      // const rankingByClass = this.getRankingBy(
-      //   models, this.rankingCriteria, classNames);            
-      // this.drawRankingLines(
-      //   rankingSvg, rankingByClass, models, classNames);      // Draw ranking lines
-
-      // VisUtil.sortSvgObjs(rankingSvg, ['circle', 'text']);    // Sort visual elements
-
+      // Sort visual elements
+      VisUtil.sortSvgObjs(svg, ['image', 'rect', 'line', 'text']);
       // this.addEventRanking(rankingSvg, modelNames);           // Add event listners
     },
     drawConfusionAxis: function (svg, classNames) {
@@ -396,7 +396,7 @@ const app = new Vue({
       });
       return matrix;
     },
-    drawConfusionVis: function (svg, confusonMatrix) {
+    drawConfusionMatrix: function (svg, confusonMatrix) {
       const classNames = _.keys(confusonMatrix);
       const classLen = classNames.length;
       const w = this.s_confusion.CELL_WIDTH;
@@ -407,14 +407,52 @@ const app = new Vue({
         for (let pred = 0; pred < classLen; pred++) {
           const y = pred * h;
           const val = Math.floor(confusonMatrix[real][pred] * 1000) / 1000;
-          console.log(confusonMatrix[real][pred], val);
-          if (real === pred) continue;
-          VisUtil.rect(svg, { x, y, w, h, fill: this.colors.confusion_red(val) });
-          VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
-
+          const color = (real === pred) ? 'rgb(255, 255, 255, 0)' : this.colors.confusion_red(val);
+          VisUtil.rect(svg, { x, y, w, h, fill: color, st_width: '1px' });
+          // VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
         }
       }
     },
+    getRepImageIdxs: function (preds, classNames) {
+      const matrix = this.getEmptyMatrix(classNames);
+      _.forEach(classNames, (real) => {
+        _.forEach(classNames, (pred) => {
+          const filtered = _.filter(preds, p => p['real'] === real && p['pred'] === pred);
+          const sorted = _.sortBy(filtered, p => - p['pred_proba'][pred]);
+          const repImage = sorted[0];
+          const maxInstanceIdx = (preds.indexOf(repImage)) % 1000;
+          matrix[real][pred] = maxInstanceIdx;
+        });
+      });
+      return matrix;
+    },
+    drawConfusionRepImages: function (svg, dataName, repImageMatrix) {
+      const classNames = _.keys(repImageMatrix);
+      const classLen = classNames.length;
+      const w = this.s_confusion.CELL_WIDTH;
+      const h = this.s_confusion.CELL_HEIGHT;
+      const im_w = this.s_confusion.IAMGE_WIDTH;
+      const im_h = this.s_confusion.IMAGE_HEIGHT;
+
+      const x_start = this.s_confusion.LEFT_LEGEND_WIDTH + w;
+      for (let real = 0; real < classLen; real++) {
+        const x = x_start + real * w;
+        for (let pred = 0; pred < classLen; pred++) {
+          if (real === pred) continue;
+          const repIdx = repImageMatrix[real][pred];
+          if (_.isNil(repIdx) || repIdx < 0) continue;
+          const y = pred * h;
+          const file = `./data/${dataName}/images/${real}/${real}_${repIdx + 1}.png`
+          VisUtil.image(svg, file, {
+            x: x + (w - im_w) / 2,
+            y: y + (h - im_h) / 2,
+            w: im_w,
+            h: im_h,
+          });
+        }
+      }
+    }
+
     /*-------------------------------- C O N F U S I O N --------------------------------*/
   },
   watch: {

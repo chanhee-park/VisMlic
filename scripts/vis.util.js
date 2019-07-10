@@ -56,6 +56,8 @@ const VisUtil = {
         width: _.isNil(attrs.w) ? 100 : attrs.w,
         height: _.isNil(attrs.h) ? 100 : attrs.h,
         fill: _.isNil(attrs.fill) ? '#ccc' : attrs.fill,
+        stroke: _.isNil(attrs.stroke) ? '#ccc' : attrs.stroke,
+        'stroke-width': _.isNil(attrs.st_width) ? '0px' : attrs.st_width,
       })
       .classed(attrs.class, !_.isNil(attrs.class));
   },
@@ -67,7 +69,19 @@ const VisUtil = {
         r: _.isNil(attrs.r) ? 20 : attrs.r,
         fill: _.isNil(attrs.fill) ? '#fff' : attrs.fill,
         stroke: _.isNil(attrs.stroke) ? '#ccc' : attrs.stroke,
-        'stroke-width': _.isNil(attrs.width) ? '3px' : attrs.width,
+        'stroke-width': _.isNil(attrs.st_width) ? '3px' : attrs.st_width,
+      })
+      .classed(attrs.class, !_.isNil(attrs.class));
+  },
+  image: (svg, file, attrs) => {
+    svg.append('image')
+      .attrs({
+        "xlink:href": file,
+        x: _.isNil(attrs.x) ? 10 : attrs.x,
+        y: _.isNil(attrs.y) ? 10 : attrs.y,
+        width: _.isNil(attrs.w) ? 10 : attrs.w,
+        height: _.isNil(attrs.h) ? 10 : attrs.h,
+        opacity: _.isNil(attrs.opacity) ? 1 : attrs.opacity,
       })
       .classed(attrs.class, !_.isNil(attrs.class));
   },
@@ -80,3 +94,5 @@ const VisUtil = {
     _.forEach(selectors, (selector) => svg.selectAll(selector).raise());
   }
 }
+
+// const imageFile = `./data/mnist/images/${real}/${}`
