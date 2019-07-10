@@ -355,6 +355,11 @@ const app = new Vue({
       const classNames = this.dataInfo[dataName].classNames;
       const predictResult = this.models[modelName].predict;
 
+      // Empty svg & Draw axis
+      VisUtil.emptySvg('#vis-confusion');
+      this.drawConfusionLegend(svg, classNames);
+      this.drawConfusionAxis(svg, classNames);
+
       // Get confusion infomation & Draw it.
       const confusionInfo = this.getConfusionBy(predictResult, classNames);
       const repImageIdxs = this.getRepImageIdxs(predictResult, classNames);
@@ -364,6 +369,20 @@ const app = new Vue({
       // Sort visual elements
       VisUtil.sortSvgObjs(svg, ['image', 'rect', 'line', 'text']);
       // this.addEventRanking(rankingSvg, modelNames);           // Add event listners
+    },
+    drawConfusionLegend: function (svg, classNames) {
+      const l_legend_w = this.s_confusion.LEFT_LEGEND_WIDTH;
+      const whole_h = this.s_confusion.HEIGHT;
+      const cell_h = this.s_confusion.CELL_HEIGHT;
+      const cell_w = this.s_confusion.CELL_WIDTH;
+      VisUtil.text(svg, 'Predicted Classes',
+        { x: l_legend_w / 2, y: whole_h / 2, fill: '#333', size: '24px', 'writing-mode': 'tb', });
+      _.forEach(classNames, (className, row) => {
+        VisUtil.text(svg, className, {
+          x: l_legend_w + cell_w / 2,
+          y: row * cell_h + cell_h / 2,
+        })
+      });
     },
     drawConfusionAxis: function (svg, classNames) {
       const total_h = this.s_confusion.HEIGHT;
@@ -452,7 +471,6 @@ const app = new Vue({
         }
       }
     }
-
     /*-------------------------------- C O N F U S I O N --------------------------------*/
   },
   watch: {
@@ -479,7 +497,8 @@ const app = new Vue({
       // Draw Legends & Axis
       this.drawRakingLegendTop(rankingSvg, classNames);
       this.drawRakingLegendLeft(rankingSvg, modelNames);
-      this.drawConfusionAxis(confusionSvg, classNames)
+      this.drawConfusionLegend(confusionSvg, classNames);
+      this.drawConfusionAxis(confusionSvg, classNames);
 
       // Visualize
       this.visualizeRanking(rankingSvg, newModels, dataName, this.rankingCriteria);
@@ -491,7 +510,6 @@ const app = new Vue({
         // update
         console.log(`모델 ${newModelName}이(가) 선택되었습니다.`);
         const confusionSvg = d3.select('#vis-confusion');
-        VisUtil.emptySvg('#vis-confusion');
         const dataName = this.selecteddata;
         this.visualizeConfusion(confusionSvg, newModelName, dataName);
       } else {

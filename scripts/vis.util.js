@@ -16,6 +16,10 @@ const VisUtil = {
         'text-anchor': _.isNil(attrs.anchor) ? 'middle' : attrs.anchor,
         'alignment-baseline': _.isNil(attrs.baseline) ? 'central' : attrs.baseline,
         'fill': _.isNil(attrs.fill) ? '#555' : attrs.fill,
+        'writing-mode': _.isNil(attrs['writing-mode']) ? 'horizontal-tb' : attrs['writing-mode'],
+        'word-spacing': _.isNil(attrs['writing-mode']) ? '1' : '15',
+        'letter-spacing': _.isNil(attrs['writing-mode']) ? '1' : '1.5',
+
       })
       .style("font-size", _.isNil(attrs.size) ? '20px' : attrs.size)
       .classed(attrs.class, !_.isNil(attrs.class));

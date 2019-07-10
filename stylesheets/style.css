@@ -89,8 +89,8 @@ svg {
 /* each sections */
 
 .ranking__title {
-  height: 16px;
-  /* overlap 12px*/
+  height: 20px;
+  /* overlap 8px*/
 }
 
 svg#vis-ranking {
