@@ -31,6 +31,7 @@ TODO: 모델 코드 .py:
 
 TODO: Pascal VOC - CNN:
   hyperprameters 변경에 대한 case study
+-- 7월 까지 --
 
 TODO: class clustering:
   8개 ~ 12개 클래스로 clustering 한다.
@@ -38,4 +39,8 @@ TODO: class clustering:
 
 TODO: Cifar 100 - CNN:
   모델 진화에 대한 case study
+-- 8월 까지 --
 
+TODO: re-design for demo:
+  최대한 많은 디바이스를 커버할 수 있도록, 앱의 높이와 넓이를 변수화한다.
+-- 10월 부터 (논문 먼저 다 쓰자)--
