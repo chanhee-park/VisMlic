@@ -18,4 +18,24 @@
 
 0715(월)
   인스턴스 뷰를 vue 로 바로 렌더링하도록 개발
-  
+
+
+
+TODO: MNIST 모델 5개: 
+  모델 구축, 학습, 예측, 그리고 t-SNE 까지 모두 끝낸다.
+
+TODO: 모델 코드 .py: 
+  주피터 노트북이 github에서 잘 안뜰때가 많다. 
+  그리고, 코드 재사용성을 고려해봐도 .py가 깔끔하다. 
+  주석 잘 달아서 .py로 옮기자.
+
+TODO: Pascal VOC - CNN:
+  hyperprameters 변경에 대한 case study
+
+TODO: class clustering:
+  8개 ~ 12개 클래스로 clustering 한다.
+  속도문제 없으면 브라우저에서 해보자. 
+
+TODO: Cifar 100 - CNN:
+  모델 진화에 대한 case study
+
