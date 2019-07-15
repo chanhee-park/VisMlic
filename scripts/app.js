@@ -98,7 +98,7 @@ const app = new Vue({
      * @param {*} dataName
      */
     getModel: async function (modelName, dataName) {
-      const dirname = `/data/${dataName}/result/`;
+      const dirname = `../data/${dataName}/result/`;
       const filename = `${dataName}_${modelName}__result.json`;
       const response = await fetch(dirname + filename);
       return await response.json();
