@@ -561,7 +561,6 @@ const app = new Vue({
   watch: {
     selectedData: async function (newdata) {
       this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
-
       // Update Other Data
       this.selectedModelName = null;
       this.selectedConfuion = { real: null, pred: null };
