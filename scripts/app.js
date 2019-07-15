@@ -225,8 +225,8 @@ const app = new Vue({
       this.s_ranking.NUM_OF_COLUMNS = classNames.length + 1;  // Class Cells + An Accuracy Cell
       this.s_ranking.CELL_WIDTH = this.s_ranking.RANKING_VIS_WIDHT / this.s_ranking.NUM_OF_COLUMNS;
       this.s_ranking.CELL_HEIGHT = this.s_ranking.RANKING_VIS_HEIGHT / modelNames.length;
-      this.s_ranking.RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.3;
-      this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.7;
+      this.s_ranking.RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.25;
+      this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH = this.s_ranking.CELL_HEIGHT * 0.75;
 
       this.s_confusion.NUM_OF_COLUMNS = classNames.length;
       this.s_confusion.CELL_WIDTH = this.s_ranking.CELL_WIDTH;
