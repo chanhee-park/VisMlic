@@ -477,8 +477,9 @@ const app = new Vue({
     addEventConfusion: function (svg, dataName, classNames) {
       for (let real of classNames) {
         for (let pred of classNames) {
+          if (real === pred) continue;
           const selector = `rect.confusion-${real}-${pred}`;
-          d3.selectAll(selector)
+          svg.selectAll(selector)
             .on('mousedown', () => this.mouseDownConfusion(dataName, real, pred));
         }
       }
