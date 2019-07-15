@@ -98,5 +98,3 @@ const VisUtil = {
     _.forEach(selectors, (selector) => svg.selectAll(selector).raise());
   }
 }
-
-// const imageFile = `./data/mnist/images/${real}/${}`

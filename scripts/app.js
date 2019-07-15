@@ -44,7 +44,7 @@ const app = new Vue({
     dataInfo: {
       mnist: {
         classNames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        modelNames: ['rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp'],
+        modelNames: ['rfc_50', 'nn_5-layers', 'nn_3-layers', 'rfc_25', 'slp'],
         modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
       }
     },
@@ -97,6 +97,10 @@ const app = new Vue({
       const filename = `${dataName}_${modelName}__result.json`;
       const response = await fetch(dirname + filename);
       return await response.json();
+    },
+
+    getImageFilename: function (dataName, classname, index) {
+      return `./data/${dataName}/images/${classname}/${classname}_${index + 1}.png`;
     },
     /*------------------------------------- D A T A -------------------------------------*/
     /*---------------------------------- R A N K I N G ----------------------------------*/
@@ -286,7 +290,6 @@ const app = new Vue({
         });
       });
     },
-
     // Evnets for visual elements in ranking section.
     addEventRanking: function (svg, modelNames) {
       _.forEach(modelNames, (modelName) => {
@@ -367,7 +370,7 @@ const app = new Vue({
 
       // Sort visual elements
       VisUtil.sortSvgObjs(svg, ['image', 'rect', 'line', 'text']);
-      // this.addEventRanking(rankingSvg, modelNames);           // Add event listners
+      this.addEventConfusion(svg, dataName, classNames);           // Add event listners
     },
     drawConfusionLegend: function (svg, classNames) {
       const l_legend_w = this.s_confusion.LEFT_LEGEND_WIDTH;
@@ -393,7 +396,7 @@ const app = new Vue({
         const col_x = l_legend_w + cell_w + idx * cell_w;
         const row_y = idx * cell_h;
         VisUtil.line(svg, { x1: l_legend_w + cell_w, x2: total_w, y1: row_y, y2: row_y }); // 가로줄
-        VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });         // 세로줄
+        VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });
       });
     },
     getConfusionBy: function (preds, classNames) {
@@ -426,7 +429,7 @@ const app = new Vue({
           const y = pred * h;
           const val = Math.floor(confusonMatrix[real][pred] * 1000) / 1000;
           const color = (real === pred) ? 'rgb(255, 255, 255, 0)' : this.colors.confusion_red(val);
-          VisUtil.rect(svg, { x, y, w, h, fill: color, st_width: '1px' });
+          VisUtil.rect(svg, { x, y, w, h, fill: color, st_width: '1px', class: `confusion-${real}-${pred}` });
           // VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
         }
       }
@@ -451,8 +454,8 @@ const app = new Vue({
       const h = this.s_confusion.CELL_HEIGHT;
       const im_w = this.s_confusion.IAMGE_WIDTH;
       const im_h = this.s_confusion.IMAGE_HEIGHT;
-
       const x_start = this.s_confusion.LEFT_LEGEND_WIDTH + w;
+
       for (let real = 0; real < classLen; real++) {
         const x = x_start + real * w;
         for (let pred = 0; pred < classLen; pred++) {
@@ -460,7 +463,7 @@ const app = new Vue({
           const repIdx = repImageMatrix[real][pred];
           if (_.isNil(repIdx) || repIdx < 0) continue;
           const y = pred * h;
-          const file = `./data/${dataName}/images/${real}/${real}_${repIdx + 1}.png`
+          const file = this.getImageFilename(dataName, real, repIdx);
           VisUtil.image(svg, file, {
             x: x + (w - im_w) / 2,
             y: y + (h - im_h) / 2,
@@ -469,7 +472,20 @@ const app = new Vue({
           });
         }
       }
-    }
+    },
+    // Evnets for visual elements in ranking section.
+    addEventConfusion: function (svg, dataName, classNames) {
+      for (let real of classNames) {
+        for (let pred of classNames) {
+          const selector = `rect.confusion-${real}-${pred}`;
+          d3.selectAll(selector)
+            .on('mousedown', () => this.mouseDownConfusion(dataName, real, pred));
+        }
+      }
+    },
+    mouseDownConfusion: function (dataName, realClass, predClass) {
+      console.log(dataName, realClass, predClass);
+    },
     /*-------------------------------- C O N F U S I O N --------------------------------*/
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
     // TODO:  모델 재 개발 및 t-SNE 맵 시각화 개발
