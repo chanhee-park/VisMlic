@@ -25,6 +25,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="/stylesheets/scrollbar.css" />
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="scripts/libraries/lodash.min.js"></script>
     <script src="scripts/libraries/d3.min.js"></script>
@@ -67,7 +68,22 @@
         id="instances"
       >
         <div class="title instances__title">{{ s_instances.title }}</div>
-        <svg id="vis-instances"></svg>
+        <div class="description instances__description">
+          <div>
+            Data : <b>{{ selectedData }}</b>
+          </div>
+          <div>Model : {{ selectedModelName }}</div>
+          <div>Real Class : {{ selectedConfuion.real }}</div>
+          <div>Predicted Class : {{ selectedConfuion.pred }}</div>
+        </div>
+        <div class="instance-list">
+          <img
+            v-for="(filename, index) in s_instances.filenames"
+            class="instance-each"
+            :src="filename"
+            alt="misclassified instances"
+          />
+        </div>
       </div>
     </div>
   </body>

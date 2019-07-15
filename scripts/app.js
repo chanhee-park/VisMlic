@@ -36,10 +36,16 @@ const app = new Vue({
       title: '2D Projection'
     },
     s_instances: {
-      title: 'Instances'
+      title: 'Instances',
+      filenames: [],
     },
     // app.data -> dataset
-    selecteddata: '',
+    selectedData: '',
+    selectedModelName: '',
+    selectedConfuion: {
+      real: null,
+      pred: null,
+    },
     dataNames: ['mnist'],
     dataInfo: {
       mnist: {
@@ -50,7 +56,6 @@ const app = new Vue({
     },
     // app.data -> models for visualization
     models: {},
-    selectedModelName: '',
     rankingCriteria: 'recall',
     // app.data -> visual element's features
     font_size: {
@@ -103,13 +108,13 @@ const app = new Vue({
       return `./data/${dataName}/images/${classname}/${classname}_${index + 1}.png`;
     },
     /*------------------------------------- D A T A -------------------------------------*/
+    /*-----------------------------------------------------------------------------------*/
     /*---------------------------------- R A N K I N G ----------------------------------*/
     /**
      * 모델 예측 결과들을 입력 받아 랭킹을 시각화 한다. 
      * @param {*} models 
      */
     visualizeRanking: function (svg, models, dataName, criteria) {
-      console.log(`=> 랭킹 시각화를 생성합니다. visualizeRanking(${{ dataName, models }})`);
       // Set data infomaition
       const classNames = this.dataInfo[dataName].classNames;
       const modelNames = _.keys(models);
@@ -142,7 +147,7 @@ const app = new Vue({
             accuracy: 1 - models[modelName].performance.accuracy
           });
         });
-        const sorted = _.sortBy(classPerformance, ['performance', 'accuracy', 'modelName'])
+        const sorted = _.sortBy(classPerformance, ['performance', 'accuracy', 'modelName']);
         ranking[className] = _.map(sorted, e => e.modelName);
       });
       return ranking;
@@ -183,7 +188,9 @@ const app = new Vue({
         { x: this.s_ranking.WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
       const columnLegends = ['Accuracy', ...classNames];
       _.forEach(columnLegends, (text, i) => {
-        const x = this.s_ranking.LEFT_LEGEND_WIDTH + i * this.s_ranking.CELL_WIDTH + this.s_ranking.CELL_WIDTH / 2;
+        const x = this.s_ranking.LEFT_LEGEND_WIDTH +
+          i * this.s_ranking.CELL_WIDTH +
+          this.s_ranking.CELL_WIDTH / 2;
         const y = this.s_ranking.TOP_LEGEND_HEIGHT - 5;
         VisUtil.text(svg, text, { x, y, baseline: 'ideographic' });
       });
@@ -233,7 +240,9 @@ const app = new Vue({
       _.forEach(modelNames, (modelName, yi) => {
         const modelColor = this.colors[modelName];
         let x = this.s_ranking.LEFT_LEGEND_WIDTH;
-        let y = this.s_ranking.TOP_LEGEND_HEIGHT + yi * this.s_ranking.CELL_HEIGHT + this.s_ranking.CELL_HEIGHT / 2; // for accuracy
+        let y = this.s_ranking.TOP_LEGEND_HEIGHT +
+          yi * this.s_ranking.CELL_HEIGHT +
+          this.s_ranking.CELL_HEIGHT / 2; // for accuracy
         let performance = Math.floor(models[modelName].performance.accuracy * 100);
         let r = this.getRadius(performance, this.s_ranking.CELL_HEIGHT / 2, 10, 100, 80);
         let heatRgb = this.getPerformanceColor(performance);
@@ -268,11 +277,18 @@ const app = new Vue({
           const rank = rankingByClass[className].indexOf(modelName);
           performance = Math.floor(models[modelName].performance[this.rankingCriteria][className] * 100);
           x = this.s_ranking.LEFT_LEGEND_WIDTH + (xi + 1) * this.s_ranking.CELL_WIDTH;
-          y = this.s_ranking.TOP_LEGEND_HEIGHT + rank * this.s_ranking.CELL_HEIGHT + this.s_ranking.CELL_HEIGHT / 2;
+          y = this.s_ranking.TOP_LEGEND_HEIGHT +
+            rank * this.s_ranking.CELL_HEIGHT +
+            this.s_ranking.CELL_HEIGHT / 2;
           r = this.getRadius(performance, this.s_ranking.CELL_HEIGHT / 2, 10, 100, 80);
           heatRgb = this.getPerformanceColor(performance);
           VisUtil.circle(svg, {
-            x: x + this.s_ranking.CELL_WIDTH / 2, y, r, stroke: modelColor, fill: heatRgb, class: `ranking-${modelName}`
+            x: x + this.s_ranking.CELL_WIDTH / 2,
+            y,
+            r,
+            stroke: modelColor,
+            fill: heatRgb,
+            class: `ranking-${modelName}`
           })
           VisUtil.text(svg, performance, {
             x: x + this.s_ranking.CELL_WIDTH / 2, y, class: `ranking-${modelName}`
@@ -314,13 +330,15 @@ const app = new Vue({
       this.highlightModel(svg, this.selectedModelName);
     },
     highlightModel: function (svg, modelName) {
-      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH);
+      svg.selectAll(`path.ranking-${modelName}`)
+        .style('stroke-width', this.s_ranking.HIGHLIGHT_RANKING_LINE_WIDTH);
       svg.selectAll(`line.ranking-${modelName}`).style('stroke-opacity', 1);
       svg.selectAll(`text.ranking-${modelName}`).style('fill', '#000000');
       svg.selectAll(`text.ranking-${modelName}`).style('font-weight', '900');
     },
     deHighlightModel: function (svg, modelName) {
-      svg.selectAll(`path.ranking-${modelName}`).style('stroke-width', this.s_ranking.RANKING_LINE_WIDTH);
+      svg.selectAll(`path.ranking-${modelName}`)
+        .style('stroke-width', this.s_ranking.RANKING_LINE_WIDTH);
       svg.selectAll(`line.ranking-${modelName}`).style('stroke-opacity', 0);
       svg.selectAll(`text.ranking-${modelName}`).style('fill', '#555555');
       svg.selectAll(`text.ranking-${modelName}`).style('font-weight', '600');
@@ -349,10 +367,9 @@ const app = new Vue({
       return `rgb(${c}, ${c}, ${c})`;
     },
     /*---------------------------------- R A N K I N G ----------------------------------*/
+    /*-----------------------------------------------------------------------------------*/
     /*-------------------------------- C O N F U S I O N --------------------------------*/
     visualizeConfusion: function (svg, modelName, dataName) {
-      console.log(`=> 컨퓨전 매트릭스 시각화를 생성합니다. visualizeConfusion(${{ dataName, modelName }})`);
-
       // Set data infomaition
       const classNames = this.dataInfo[dataName].classNames;
       const predictResult = this.models[modelName].predict;
@@ -370,8 +387,9 @@ const app = new Vue({
 
       // Sort visual elements
       VisUtil.sortSvgObjs(svg, ['image', 'rect', 'line', 'text']);
-      this.addEventConfusion(svg, dataName, classNames);           // Add event listners
+      this.addEventConfusion(svg, classNames);           // Add event listners
     },
+    // draw legend for confucion matrix
     drawConfusionLegend: function (svg, classNames) {
       const l_legend_w = this.s_confusion.LEFT_LEGEND_WIDTH;
       const whole_h = this.s_confusion.HEIGHT;
@@ -386,6 +404,7 @@ const app = new Vue({
         })
       });
     },
+    // draw axis for confusion matrix
     drawConfusionAxis: function (svg, classNames) {
       const total_h = this.s_confusion.HEIGHT;
       const total_w = this.s_confusion.WIDTH;
@@ -399,6 +418,7 @@ const app = new Vue({
         VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });
       });
     },
+    // get image index matrix of confusion
     getConfusionBy: function (preds, classNames) {
       const numOfClassElem = preds.length / classNames.length;
       const matrix = this.getEmptyMatrix(classNames);
@@ -407,6 +427,7 @@ const app = new Vue({
       });
       return matrix;
     },
+    // get empty marix object (that has keys of classname for colunms and rows)
     getEmptyMatrix: function (classNames) {
       const matrix = {};
       _.forEach(classNames, (real) => {
@@ -417,6 +438,7 @@ const app = new Vue({
       });
       return matrix;
     },
+    // draw heatmap (confusion matrix) with draw confusion matrix with misclassified ratio
     drawConfusionMatrix: function (svg, confusonMatrix) {
       const classNames = _.keys(confusonMatrix);
       const classLen = classNames.length;
@@ -434,19 +456,23 @@ const app = new Vue({
         }
       }
     },
-    getRepImageIdxs: function (preds, classNames) {
+    // get index array of representitive misclassified instances
+    getRepImageIdxs: function (modelPreds, classNames) {
       const matrix = this.getEmptyMatrix(classNames);
       _.forEach(classNames, (real) => {
+        const realFiltered = _.filter(modelPreds, p => p.real === real);
+        const classInstancesSize = realFiltered.length;
         _.forEach(classNames, (pred) => {
-          const filtered = _.filter(preds, p => p['real'] === real && p['pred'] === pred);
+          const filtered = _.filter(realFiltered, p => p['pred'] === pred);
           const sorted = _.sortBy(filtered, p => - p['pred_proba'][pred]);
           const repImage = sorted[0];
-          const maxInstanceIdx = (preds.indexOf(repImage)) % 1000;
+          const maxInstanceIdx = (modelPreds.indexOf(repImage)) % classInstancesSize;
           matrix[real][pred] = maxInstanceIdx;
         });
       });
       return matrix;
     },
+    // draw instances (confusion matrix) with representitive misclassified image
     drawConfusionRepImages: function (svg, dataName, repImageMatrix) {
       const classNames = _.keys(repImageMatrix);
       const classLen = classNames.length;
@@ -474,34 +500,74 @@ const app = new Vue({
       }
     },
     // Evnets for visual elements in ranking section.
-    addEventConfusion: function (svg, dataName, classNames) {
+    addEventConfusion: function (svg, classNames) {
       for (let real of classNames) {
         for (let pred of classNames) {
           if (real === pred) continue;
           const selector = `rect.confusion-${real}-${pred}`;
           svg.selectAll(selector)
-            .on('mousedown', () => this.mouseDownConfusion(dataName, real, pred));
+            .on('mousedown', () => this.mouseDownConfusion(svg, real, pred));
         }
       }
     },
-    mouseDownConfusion: function (dataName, realClass, predClass) {
-      console.log(dataName, realClass, predClass);
+    mouseDownConfusion: function (svg, realClass, predClass) {
+      this.deHighlightAllConfusionCells(svg);
+      this.highlightConfusionCell(svg, realClass, predClass);
+      this.selectedConfuion = {
+        real: realClass,
+        pred: predClass
+      }
+    },
+    highlightConfusionCell: function (svg, realClass, predClass) {
+      svg.selectAll(`rect.confusion-${realClass}-${predClass}`)
+        .style('stroke-width', '5px')
+        .style('stroke', '#000');
+    },
+    deHighlightAllConfusionCells: function (svg) {
+      svg.selectAll('rect')
+        .style('stroke-width', '1px')
+        .style('stroke', '#ccc');
     },
     /*-------------------------------- C O N F U S I O N --------------------------------*/
+    /*-----------------------------------------------------------------------------------*/
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
     // TODO:  모델 재 개발 및 t-SNE 맵 시각화 개발
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
+    /*-----------------------------------------------------------------------------------*/
     /*-------------------------------- I N S T A N C E S --------------------------------*/
-    // TODO:  인스턴스 분석 뷰 개발 <= 랭킹과 매트릭스에 클릭 인터랙션 달기
+    visualizeInstances: function (dataName, modelName, real, pred) {
+      const modelPreds = this.models[modelName].predict;
+      // get & set filenames by condition
+      const imgIdxs = this.getMisInstanceIdxs(modelPreds, real, pred);
+      this.s_instances.filenames = this.getFilenamesFromIdsx(dataName, real, imgIdxs);
+    },
+    // get index of misclassified instances by condition
+    getMisInstanceIdxs: function (modelPreds, realClass, predClass) {
+      const realConditioned = _.filter(modelPreds, (pred) => pred.real === realClass);
+      const classInstancesSize = realConditioned.length;
+      const conditioned = _.filter(realConditioned, (pred) => pred.pred === predClass);
+      const sorted = _.sortBy(conditioned, (pred) => - pred.pred_proba[predClass]);
+      const indexs = _.map(sorted, (p) => modelPreds.indexOf(p) % classInstancesSize);
+      return indexs;
+    },
+    getFilenamesFromIdsx: function (dataName, real, imgIdxs) {
+      const filenames = _.map(imgIdxs, (imgIdx) => {
+        return this.getImageFilename(dataName, real, imgIdx);
+      });
+      return filenames;
+    },
     /*-------------------------------- I N S T A N C E S --------------------------------*/
   },
   watch: {
-    selecteddata: async function (newdata) {
-      console.log(`모델 예측 데이터 ${{ newdata }}가 로드되었습니다.`)
+    selectedData: async function (newdata) {
       this.models = await this.getModels(this.dataInfo[newdata].modelNames, newdata);
+
+      // Update Other Data
+      this.selectedModelName = null;
+      this.selectedConfuion = { real: null, pred: null };
     },
     models: function (newModels) {
-      if (_.isNil(this.selecteddata) || _.isNil(newModels)) return;
+      if (_.isNil(this.selectedData) || _.isNil(newModels)) return;
       // Set & empty svg
       const rankingSvg = d3.select('#vis-ranking');
       const confusionSvg = d3.select('#vis-confusion');
@@ -509,7 +575,7 @@ const app = new Vue({
       VisUtil.emptySvg('#vis-confusion');
 
       // Set data infomaition
-      const dataName = this.selecteddata;
+      const dataName = this.selectedData;
       const classNames = this.dataInfo[dataName].classNames;
       const modelNames = _.keys(newModels);
 
@@ -525,19 +591,31 @@ const app = new Vue({
       // Visualize
       this.visualizeRanking(rankingSvg, newModels, dataName, this.rankingCriteria);
 
+      // Update Other Data
       this.selectedModelName = null;
+      this.selectedConfuion = { real: null, pred: null };
     },
     selectedModelName: function (newModelName) {
       if (_.isNil(newModelName)) return;
-      // update
-      console.log(`모델 ${newModelName}이(가) 선택되었습니다.`);
+      // Visualize
       const confusionSvg = d3.select('#vis-confusion');
-      const dataName = this.selecteddata;
+      const dataName = this.selectedData;
       this.visualizeConfusion(confusionSvg, newModelName, dataName);
+
+      // Update Other Data
+      this.selectedConfuion = { real: null, pred: null };
+    },
+    selectedConfuion: function (newConfusion) {
+      if (_.isNil(newConfusion.real) || _.isNil(newConfusion.pred)) return;
+      const dataName = this.selectedData;
+      const modelName = this.selectedModelName;
+      const real = newConfusion.real;
+      const pred = newConfusion.pred;
+      this.visualizeInstances(dataName, modelName, real, pred);
     }
   },
   async mounted () {
     // set model prediction result data
-    this.selecteddata = this.dataNames[0]; // minst
+    this.selectedData = this.dataNames[0]; // minst
   },
 })
