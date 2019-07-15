@@ -605,7 +605,10 @@ const app = new Vue({
       this.selectedConfuion = { real: null, pred: null };
     },
     selectedConfuion: function (newConfusion) {
-      if (_.isNil(newConfusion.real) || _.isNil(newConfusion.pred)) return;
+      if (_.isNil(newConfusion.real) || _.isNil(newConfusion.pred)) {
+        this.s_instances.filenames = [];
+        return;
+      }
       const dataName = this.selectedData;
       const modelName = this.selectedModelName;
       const real = newConfusion.real;
