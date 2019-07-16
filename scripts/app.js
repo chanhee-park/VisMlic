@@ -50,7 +50,7 @@ const app = new Vue({
     dataInfo: {
       mnist: {
         classNames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        modelNames: ['rfc_50', 'nn_5-layers', 'nn_3-layers', 'rfc_25', 'slp'],
+        modelNames: ['rfc_50', '2dnn', 'nn_5-layers', 'nn_3-layers', 'rfc_25', 'slp'],
         modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
       }
     },
@@ -101,7 +101,11 @@ const app = new Vue({
       const dirname = `./data/${dataName}/result/`;
       const filename = `${dataName}_${modelName}__result.json`;
       const response = await fetch(dirname + filename);
-      return await response.json();
+      let json = await response.json();
+      if (typeof json === 'string') {
+        json = eval('(' + json + ')');
+      }
+      return json;
     },
 
     getImageFilename: function (dataName, classname, index) {
@@ -439,8 +443,8 @@ const app = new Vue({
       return matrix;
     },
     // draw heatmap (confusion matrix) with draw confusion matrix with misclassified ratio
-    drawConfusionMatrix: function (svg, confusonMatrix) {
-      const classNames = _.keys(confusonMatrix);
+    drawConfusionMatrix: function (svg, confusionMatrix) {
+      const classNames = _.keys(confusionMatrix);
       const classLen = classNames.length;
       const w = this.s_confusion.CELL_WIDTH;
       const h = this.s_confusion.CELL_HEIGHT;
@@ -449,7 +453,7 @@ const app = new Vue({
         const x = x_start + real * w;
         for (let pred = 0; pred < classLen; pred++) {
           const y = pred * h;
-          const val = Math.floor(confusonMatrix[real][pred] * 1000) / 1000;
+          const val = Math.floor(confusionMatrix[real][pred] * 1000) / 1000;
           const color = (real === pred) ? 'rgb(255, 255, 255, 0)' : this.colors.confusion_red(val);
           VisUtil.rect(svg, { x, y, w, h, fill: color, st_width: '1px', class: `confusion-${real}-${pred}` });
           // VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
@@ -464,7 +468,7 @@ const app = new Vue({
         const classInstancesSize = realFiltered.length;
         _.forEach(classNames, (pred) => {
           const filtered = _.filter(realFiltered, p => p['pred'] === pred);
-          const sorted = _.sortBy(filtered, p => - p['pred_proba'][pred]);
+          const sorted = _.sortBy(filtered, p => - p['prob'][pred]);
           const repImage = sorted[0];
           const maxInstanceIdx = (modelPreds.indexOf(repImage)) % classInstancesSize;
           matrix[real][pred] = maxInstanceIdx;
@@ -546,7 +550,7 @@ const app = new Vue({
       const realConditioned = _.filter(modelPreds, (pred) => pred.real === realClass);
       const classInstancesSize = realConditioned.length;
       const conditioned = _.filter(realConditioned, (pred) => pred.pred === predClass);
-      const sorted = _.sortBy(conditioned, (pred) => - pred.pred_proba[predClass]);
+      const sorted = _.sortBy(conditioned, (pred) => - pred.prob[predClass]);
       const indexs = _.map(sorted, (p) => modelPreds.indexOf(p) % classInstancesSize);
       return indexs;
     },
@@ -616,7 +620,7 @@ const app = new Vue({
       this.visualizeInstances(dataName, modelName, real, pred);
     }
   },
-  async mounted () {
+  async mounted() {
     // set dataName
     this.selectedData = this.dataNames[0]; // minst
   },
