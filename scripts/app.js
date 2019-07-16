@@ -50,7 +50,7 @@ const app = new Vue({
     dataInfo: {
       mnist: {
         classNames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        modelNames: ['rfc_50', '2dnn', 'nn_5-layers', 'nn_3-layers', 'rfc_25', 'slp'],
+        modelNames: ['cnn', 'sae', 'dnn', 'slp'],
         modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
       }
     },
@@ -63,6 +63,9 @@ const app = new Vue({
     },
     colors: {
       'cnn': '#FD8D3C',
+      'dnn': '#3182BD',
+      'slp': '#9E9AC8',
+      'sae': '#74C476',
       'nn_10-layers': '#3182BD',
       'nn_5-layers': '#6BAED6',
       'nn_3-layers': '#9ECAE1',
@@ -99,7 +102,7 @@ const app = new Vue({
      */
     getModel: async function (modelName, dataName) {
       const dirname = `./data/${dataName}/result/`;
-      const filename = `${dataName}_${modelName}__result.json`;
+      const filename = `${dataName}_${modelName}.json`;
       const response = await fetch(dirname + filename);
       let json = await response.json();
       if (typeof json === 'string') {
