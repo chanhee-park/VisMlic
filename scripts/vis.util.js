@@ -31,8 +31,8 @@ const VisUtil = {
         x2: _.isNil(attrs.x2) ? 200 : attrs.x2,
         y1: _.isNil(attrs.y1) ? 100 : attrs.y1,
         y2: _.isNil(attrs.y2) ? 200 : attrs.y2,
-        stroke: _.isNil(attrs.stroke) ? '#ccc' : attrs.stroke,
-        'stroke-width': _.isNil(attrs.width) ? '#ccc' : attrs.width,
+        stroke: _.isNil(attrs.stroke) ? '#ddd' : attrs.stroke,
+        'stroke-width': _.isNil(attrs.width) ? 1 : attrs.width,
         'stroke-opacity': _.isNil(attrs.opacity) ? 1 : attrs.opacity,
       })
       .classed(attrs.class, !_.isNil(attrs.class));

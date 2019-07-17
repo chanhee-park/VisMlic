@@ -580,6 +580,10 @@ const app = new Vue({
         const color = this.colors.class_colors(classIdx);
         console.log(classIdx, color);
         VisUtil.circle(svg, { x: p.x, y: p.y, r: 3, fill: color, st_width: 0 });
+        /* TODO: interaction : 
+         *    hover - show a actual image 
+         *    click - popup large version (colr & image)
+        */
       });
     },
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
