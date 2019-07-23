@@ -1,92 +1,68 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>VisMLCV</title>
-    <meta charset="utf-8" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="./images/favicon_io/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="./images/favicon_io/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="./images/favicon_io/favicon-16x16.png"
-    />
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./stylesheets/style.css" />
-    <link rel="stylesheet" href="./stylesheets/scrollbar.css" />
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <script src="https://d3js.org/d3-color.v1.min.js"></script>
-    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    <script src="./scripts/libraries/lodash.min.js"></script>
-    <script src="./scripts/libraries/d3.min.js"></script>
-    <script src="./scripts/libraries/d3-selection.min.js"></script>
-    <script src="./scripts/libraries/d3-selection-multi.min.js"></script>
-  </head>
-  <body>
-    <div id="app" class="app">
-      <!-- Ranking -->
-      <div class="section section__left section__top ranking" id="ranking">
-        <div class="title ranking__title">{{ s_ranking.title }}</div>
-        <svg id="vis-ranking"></svg>
-      </div>
 
-      <!-- Confusion -->
-      <div
-        class="section section__left section__bottom confusion"
-        id="confusion"
-      >
-        <svg id="vis-confusion"></svg>
-      </div>
+<head>
+  <title>VisMLCV</title>
+  <meta charset="utf-8" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./images/favicon_io/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon_io/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon_io/favicon-16x16.png" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./stylesheets/style.css" />
+  <link rel="stylesheet" href="./stylesheets/scrollbar.css" />
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="./scripts/libraries/lodash.min.js"></script>
+  <script src="./scripts/libraries/d3.min.js"></script>
+  <script src="./scripts/libraries/d3-selection.min.js"></script>
+  <script src="./scripts/libraries/d3-selection-multi.min.js"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+</head>
 
-      <!-- Projection -->
-      <div
-        class="section section__right section__top projection"
-        id="projection"
-      >
-        <div class="title projection__title">
-          {{ s_projection.title }}
-        </div>
-        <svg id="vis-projection"></svg>
-      </div>
+<body>
+  <div id="app" class="app">
+    <!-- Ranking -->
+    <div class="section section__left section__top ranking" id="ranking">
+      <div class="title ranking__title">{{ s_ranking.title }}</div>
+      <svg id="vis-ranking"></svg>
+    </div>
 
-      <!-- Instances -->
-      <div
-        class="section section__right section__bottom instances"
-        id="instances"
-      >
-        <div class="title instances__title">{{ s_instances.title }}</div>
-        <div class="description instances__description">
-          <div>
-            Data : <b>{{ selectedData }}</b>
-          </div>
-          <div>Model : {{ selectedModelName }}</div>
-          <div>Real Class : {{ selectedConfuion.real }}</div>
-          <div>Predicted Class : {{ selectedConfuion.pred }}</div>
+    <!-- Confusion -->
+    <div class="section section__left section__bottom confusion" id="confusion">
+      <svg id="vis-confusion"></svg>
+    </div>
+
+    <!-- Projection -->
+    <div class="section section__right section__top projection" id="projection">
+      <div class="title projection__title">
+        {{ s_projection.title }}
+      </div>
+      <svg id="vis-projection"></svg>
+    </div>
+
+    <!-- Instances -->
+    <div class="section section__right section__bottom instances" id="instances">
+      <div class="title instances__title">{{ s_instances.title }}</div>
+      <div class="description instances__description">
+        <div>
+          Data : <b>{{ selectedData }}</b>
         </div>
-        <div class="instance-list">
-          <img
-            v-for="(filename, index) in s_instances.filenames"
-            class="instance-each"
-            :src="filename"
-            alt="misclassified instances"
-          />
-        </div>
+        <div>Model : {{ selectedModelName }}</div>
+        <div>Real Class : {{ selectedConfuion.real }}</div>
+        <div>Predicted Class : {{ selectedConfuion.pred }}</div>
+      </div>
+      <div class="instance-list">
+        <img v-for="(filename, index) in s_instances.filenames" class="instance-each" :src="filename"
+          alt="misclassified instances" />
       </div>
     </div>
-  </body>
-  <script src="./scripts/vis.util.js"></script>
-  <script src="./scripts/app.js"></script>
+  </div>
+</body>
+<script src="./scripts/vis.util.js"></script>
+<script src="./scripts/app.js"></script>
+
 </html>

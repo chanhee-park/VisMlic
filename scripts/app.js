@@ -55,7 +55,12 @@ const app = new Vue({
     dataInfo: {
       mnist: {
         classNames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        modelNames: ['cnn', 'sae',  'dnn-5', 'dnn-10', 'slp'],
+        /* comaper algoritms */
+        modelNames: ['cnn', 'sae', 'dnn-5', 'dnn-10', 'slp'],
+        /* comaper epochs - check overfiiting */
+        // modelNames: ['dnn-5-ep30', 'dnn-5-ep25', 'dnn-5-ep20', 'dnn-5-ep15', 'dnn-5-ep10', 'dnn-5-ep5', 'dnn-5-ep2'], 
+        /* compaer model architecture (number of layers) */
+        // modelNames: ['dnn-15', 'dnn-10', 'dnn-5', 'dnn-3', 'slp'],
         modelNamesALL: ['cnn', 'sae', 'dnn-10', 'dnn-5', 'dnn-3', 'slp'],
       }
     },
@@ -71,8 +76,19 @@ const app = new Vue({
       'dnn-3': '#51529D',
       'dnn-5': '#3182BD',
       'dnn-10': '#61B2DD',
+      'dnn-15': '#99CDFA',
       'slp': '#9E9AC8',
       'sae': '#74C476',
+
+      'dnn-5-ep30': d3.interpolateSpectral(0.00),
+      'dnn-5-ep25': d3.interpolateSpectral(0.15),
+      'dnn-5-ep20': d3.interpolateSpectral(0.30),
+      'dnn-5-ep15': d3.interpolateSpectral(0.75),
+      'dnn-5-ep10': d3.interpolateSpectral(0.85),
+      'dnn-5-ep5': d3.interpolateSpectral(0.95),
+      'dnn-5-ep2': d3.interpolateSpectral(1.00),
+
+
       confusion_red: function (d) {
         // d is between 0.0 ~ 1.0 (대부분 0.05 이하)
         return `rgb(255, 70, 70, ${d * 10})`
@@ -89,6 +105,7 @@ const app = new Vue({
      * @param {*} dataName 
      */
     getModels: async function (modelNames, dataName) {
+      console.log(d3.interpolateGnBu);
       const models = {};
       for (let modelName of modelNames) {
         models[modelName] = await this.getModel(modelName, dataName);
@@ -568,7 +585,7 @@ const app = new Vue({
       });
       return positions;
     },
-    drawProjectedInstances (svg, instancePostions) {
+    drawProjectedInstances(svg, instancePostions) {
       // TODO: data에 className 추가 { x, y, className }
       _.forEach(instancePostions, (p, i) => {
         const classIdx = Math.floor(i / 50);
@@ -668,7 +685,7 @@ const app = new Vue({
       this.visualizeInstances(dataName, modelPreds, real, pred);
     }
   },
-  async mounted () {
+  async mounted() {
     // set dataName
     this.selectedData = this.dataNames[0]; // minst
   },
