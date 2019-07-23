@@ -7,11 +7,11 @@ const app = new Vue({
       title: 'Ranking & Confusion Matrix',
       sorting_options: ['recall', 'presicion'],
       WIDTH: 1504,
-      HEIGHT: 368,
+      HEIGHT: 388,
       LEFT_LEGEND_WIDTH: 120,
       TOP_LEGEND_HEIGHT: 70,
       RANKING_VIS_WIDHT: 1504 - 120,  // WIDTH - LEFT_LEGEND_WIDTH,
-      RANKING_VIS_HEIGHT: 368 - 70,   // HEIGHT - TOP_LEGEND_HEIGHT,
+      RANKING_VIS_HEIGHT: 388 - 70,   // HEIGHT - TOP_LEGEND_HEIGHT,
       NUM_OF_COLUMNS: null,           // Set when data is loaded.
       CELL_WIDTH: null,
       CELL_HEIGHT: null,
@@ -21,11 +21,11 @@ const app = new Vue({
     s_confusion: {
       title: 'Confusion Matrix',
       WIDTH: 1504,
-      HEIGHT: 959,
+      HEIGHT: 939,
       LEFT_LEGEND_WIDTH: 120,
       TOP_LEGEND_HEIGHT: 0,
       CONFUSION_VIS_WIDHT: 1504 - 120,  // WIDTH - LEFT_LEGEND_WIDTH,
-      CONFUSION_VIS_HEIGHT: 959 - 0,    // HEIGHT - TOP_LEGEND_HEIGHT,
+      CONFUSION_VIS_HEIGHT: 939 - 0,    // HEIGHT - TOP_LEGEND_HEIGHT,
       NUM_OF_COLUMNS: null,           // Set when data is loaded.
       CELL_WIDTH: null,
       CELL_HEIGHT: null,
@@ -35,10 +35,10 @@ const app = new Vue({
     s_projection: {
       title: '2D Projection',
       WIDTH: 383,
-      HEIGHT: 365,
+      HEIGHT: 376,
       PADDING: 15,
       VIS_WIDTH: 383 - 30,      // WIDTH - 2 * PADDING 
-      VIS_HEIGHT: 365 - 30,     // HEIGHT - 2 * PADDING 
+      VIS_HEIGHT: 376 - 30,     // HEIGHT - 2 * PADDING 
     },
     s_instances: {
       title: 'Instances',
@@ -55,8 +55,8 @@ const app = new Vue({
     dataInfo: {
       mnist: {
         classNames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        modelNames: ['cnn', 'sae', 'dnn', 'slp'],
-        modelNamesALL: ['cnn', 'rfc_50', 'nn_3-layers', 'nn_5-layers', 'rfc_25', 'slp', 'rfc_10', 'nn_10-layers'],
+        modelNames: ['cnn', 'sae',  'dnn-5', 'dnn-10', 'slp'],
+        modelNamesALL: ['cnn', 'sae', 'dnn-10', 'dnn-5', 'dnn-3', 'slp'],
       }
     },
     // app.data -> models for visualization
@@ -68,16 +68,11 @@ const app = new Vue({
     },
     colors: {
       'cnn': '#FD8D3C',
-      'dnn': '#3182BD',
+      'dnn-3': '#51529D',
+      'dnn-5': '#3182BD',
+      'dnn-10': '#61B2DD',
       'slp': '#9E9AC8',
       'sae': '#74C476',
-      'nn_10-layers': '#3182BD',
-      'nn_5-layers': '#6BAED6',
-      'nn_3-layers': '#9ECAE1',
-      'slp': '#9E9AC8',
-      'rfc_50': '#30A354',
-      'rfc_25': '#74C476',
-      'rfc_10': '#A0D99B',
       confusion_red: function (d) {
         // d is between 0.0 ~ 1.0 (대부분 0.05 이하)
         return `rgb(255, 70, 70, ${d * 10})`
@@ -262,7 +257,7 @@ const app = new Vue({
         let y = this.s_ranking.TOP_LEGEND_HEIGHT +
           yi * this.s_ranking.CELL_HEIGHT +
           this.s_ranking.CELL_HEIGHT / 2; // for accuracy
-        let performance = Math.floor(models[modelName].performance.accuracy * 100);
+        let performance = Math.floor(models[modelName].performance.accuracy * 1000) / 10;
         let r = this.getRadius(performance, this.s_ranking.CELL_HEIGHT / 2, 10, 100, 80);
         let heatRgb = this.getPerformanceColor(performance);
 
@@ -578,7 +573,6 @@ const app = new Vue({
       _.forEach(instancePostions, (p, i) => {
         const classIdx = Math.floor(i / 50);
         const color = this.colors.class_colors(classIdx);
-        console.log(classIdx, color);
         VisUtil.circle(svg, { x: p.x, y: p.y, r: 3, fill: color, st_width: 0 });
         /* TODO: interaction : 
          *    hover - show a actual image 
