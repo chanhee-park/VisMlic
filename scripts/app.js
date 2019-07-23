@@ -33,7 +33,12 @@ const app = new Vue({
       IMAGE_HEIGHT: null,
     },
     s_projection: {
-      title: '2D Projection'
+      title: '2D Projection',
+      WIDTH: 383,
+      HEIGHT: 365,
+      PADDING: 15,
+      VIS_WIDTH: 383 - 30,      // WIDTH - 2 * PADDING 
+      VIS_HEIGHT: 365 - 30,     // HEIGHT - 2 * PADDING 
     },
     s_instances: {
       title: 'Instances',
@@ -78,6 +83,7 @@ const app = new Vue({
         return `rgb(255, 70, 70, ${d * 10})`
         // return d3.interpolateReds(d); // [0, 1]
       },
+      class_colors: d3.scaleOrdinal(d3.schemeCategory10),
     },
   },
   methods: {
@@ -116,6 +122,12 @@ const app = new Vue({
     },
     /*------------------------------------- D A T A -------------------------------------*/
     /*-----------------------------------------------------------------------------------*/
+    /* 
+     * TODO: 레전드 추가 : 
+     *     1) 랭킹 원 크기와 색상, 
+     *     2) 컨퓨전 매트릭스 히트맵 색상, 
+     *     3) 프로젝션 클래스 색상
+     */
     /*---------------------------------- R A N K I N G ----------------------------------*/
     /**
      * 모델 예측 결과들을 입력 받아 랭킹을 시각화 한다. 
@@ -382,7 +394,6 @@ const app = new Vue({
       const predictResult = this.models[modelName].predict;
 
       // Empty svg & Draw axis
-      VisUtil.emptySvg('#vis-confusion');
       this.drawConfusionLegend(svg, classNames);
       this.drawConfusionAxis(svg, classNames);
 
@@ -538,12 +549,47 @@ const app = new Vue({
     /*-------------------------------- C O N F U S I O N --------------------------------*/
     /*-----------------------------------------------------------------------------------*/
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
-    // TODO:  모델 재 개발 및 t-SNE 맵 시각화 개발
+    visualizeProjection: function (svg, model) {
+      // get adjusted tsne-map
+      const tsne = model['t-sne'];
+      const maxX = this.s_projection.VIS_WIDTH;
+      const maxY = this.s_projection.VIS_HEIGHT;
+      const padding = this.s_projection.PADDING;
+      const adjusted = this.getNormalPosition(tsne, maxX, maxY, padding);
+
+      // draw map
+      this.drawProjectedInstances(svg, adjusted);
+    },
+    getNormalPosition: function (positions, normal_x_max, normal_y_max, padding) {
+      const x_min = _.minBy(positions, 'x').x;
+      const x_max = _.maxBy(positions, 'x').x;
+      const y_min = _.minBy(positions, 'y').y;
+      const y_max = _.maxBy(positions, 'y').y;
+      const x_range = x_max - x_min;
+      const y_range = y_max - y_min;
+      _.forEach(positions, (p) => {
+        p.x = (p.x - x_min) * normal_x_max / x_range + padding;
+        p.y = (p.y - y_min) * normal_y_max / y_range + padding;
+      });
+      return positions;
+    },
+    drawProjectedInstances (svg, instancePostions) {
+      // TODO: data에 className 추가 { x, y, className }
+      _.forEach(instancePostions, (p, i) => {
+        const classIdx = Math.floor(i / 50);
+        const color = this.colors.class_colors(classIdx);
+        console.log(classIdx, color);
+        VisUtil.circle(svg, { x: p.x, y: p.y, r: 3, fill: color, st_width: 0 });
+        /* TODO: interaction : 
+         *    hover - show a actual image 
+         *    click - popup large version (colr & image)
+        */
+      });
+    },
     /*----------------------------- 2 D - P R O J E C T I O N----------------------------*/
     /*-----------------------------------------------------------------------------------*/
     /*-------------------------------- I N S T A N C E S --------------------------------*/
-    visualizeInstances: function (dataName, modelName, real, pred) {
-      const modelPreds = this.models[modelName].predict;
+    visualizeInstances: function (dataName, modelPreds, real, pred) {
       // get & set filenames by condition
       const imgIdxs = this.getMisInstanceIdxs(modelPreds, real, pred);
       this.s_instances.filenames = this.getFilenamesFromIdsx(dataName, real, imgIdxs);
@@ -579,6 +625,7 @@ const app = new Vue({
       const confusionSvg = d3.select('#vis-confusion');
       VisUtil.emptySvg('#vis-ranking');
       VisUtil.emptySvg('#vis-confusion');
+      VisUtil.emptySvg('#vis-projection');
 
       // Set data infomaition
       const dataName = this.selectedData;
@@ -603,11 +650,15 @@ const app = new Vue({
     },
     selectedModelName: function (newModelName) {
       if (_.isNil(newModelName)) return;
+      const dataName = this.selectedData;
+      const selectedModel = this.models[this.selectedModelName];
       // Visualize
       const confusionSvg = d3.select('#vis-confusion');
-      const dataName = this.selectedData;
+      const projectionSvg = d3.select('#vis-projection');
+      VisUtil.emptySvg('#vis-confusion');
+      VisUtil.emptySvg('#vis-projection');
       this.visualizeConfusion(confusionSvg, newModelName, dataName);
-
+      this.visualizeProjection(projectionSvg, selectedModel)
       // Update Other Data
       this.selectedConfuion = { real: null, pred: null };
     },
@@ -617,13 +668,13 @@ const app = new Vue({
         return;
       }
       const dataName = this.selectedData;
-      const modelName = this.selectedModelName;
+      const modelPreds = this.models[this.selectedModelName].predict;
       const real = newConfusion.real;
       const pred = newConfusion.pred;
-      this.visualizeInstances(dataName, modelName, real, pred);
+      this.visualizeInstances(dataName, modelPreds, real, pred);
     }
   },
-  async mounted() {
+  async mounted () {
     // set dataName
     this.selectedData = this.dataNames[0]; // minst
   },
