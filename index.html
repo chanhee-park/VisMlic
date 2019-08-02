@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>VisMLCV</title>
     <meta charset="utf-8" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./images/favicon_io/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon_io/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon_io/favicon-16x16.png" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./images/favicon_io/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./images/favicon_io/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="./images/favicon_io/favicon-16x16.png"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./stylesheets/style.css" />
     <link rel="stylesheet" href="./stylesheets/scrollbar.css" />
     <link rel="stylesheet" href="./stylesheets/dropdown.css" />
@@ -23,63 +42,100 @@
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="app" class="app">
-        <!-- Options & Legends -->
-        <div class="section section__left option" id="option">
-            <div class="title option__title">{{ s_option.title }}</div>
-            <div class="option-section option-case">
-                <div class="option-case__title">Case : </div>
-                <div class="dropdown">
-                    <button class="dropbtn">
-                        {{s_option.case.selected}} <img class='icon' src="./images/icon/baseline-arrow_drop_down-24px.svg" alt="arrow_drop_down">
-                    </button>
-                    <div class="dropdown-content">
-                        <div v-for="(item, idx) in s_option.case.items" class="dropbox-item" v-on:click="setCase($event, idx)">{{item}}</div>
-                    </div>
-                </div>
+      <!-- Options & Legends -->
+      <div class="section section__left option" id="option">
+        <div class="title option__title">{{ s_option.title }}</div>
+        <div class="option-section option-case">
+          <div class="option-case__title">Case :</div>
+          <div class="dropdown">
+            <button class="dropbtn">
+              {{ s_option.case.selected }}
+              <img
+                class="icon"
+                src="./images/icon/baseline-arrow_drop_down-24px.svg"
+                alt="arrow_drop_down"
+              />
+            </button>
+            <div class="dropdown-content">
+              <div
+                v-for="(item, idx) in s_option.case.items"
+                class="dropbox-item"
+                v-on:click="setCase($event, idx)"
+              >
+                {{ item }}
+              </div>
             </div>
+          </div>
         </div>
+        <div class="title legend__title">Legend</div>
+        <div class="legend-section lagend-ranking-wrapper">
+          <div class="legend__title">Ranking Circle</div>
+          <svg id="legend-ranking"></svg>
+        </div>
+        <div class="legend-section lagend-confusion-wrapper">
+          <div class="legend__title">Confusion Matrix</div>
+          <svg id="legend-confusion"></svg>
+        </div>
+        <div class="legend-section lagend-projection-wrapper">
+          <div class="legend__title">2D Projection</div>
+          <svg id="legend-projection"></svg>
+        </div>
+      </div>
 
-        <!-- Ranking -->
-        <div class="section section__center section__top ranking" id="ranking">
-            <div class="title ranking__title">{{ s_ranking.title }}</div>
-            <svg id="vis-ranking"></svg>
-        </div>
+      <!-- Ranking -->
+      <div class="section section__center section__top ranking" id="ranking">
+        <div class="title ranking__title">{{ s_ranking.title }}</div>
+        <svg id="vis-ranking"></svg>
+      </div>
 
-        <!-- Confusion -->
-        <div class="section section__center section__bottom confusion" id="confusion">
-            <svg id="vis-confusion"></svg>
-        </div>
+      <!-- Confusion -->
+      <div
+        class="section section__center section__bottom confusion"
+        id="confusion"
+      >
+        <svg id="vis-confusion"></svg>
+      </div>
 
-        <!-- Projection -->
-        <div class="section section__right section__top projection" id="projection">
-            <div class="title projection__title">
-                {{ s_projection.title }}
-            </div>
-            <svg id="vis-projection"></svg>
+      <!-- Projection -->
+      <div
+        class="section section__right section__top projection"
+        id="projection"
+      >
+        <div class="title projection__title">
+          {{ s_projection.title }}
         </div>
+        <svg id="vis-projection"></svg>
+      </div>
 
-        <!-- Instances -->
-        <div class="section section__right section__bottom instances" id="instances">
-            <div class="title instances__title">{{ s_instances.title }}</div>
-            <div class="description instances__description">
-                <div>
-                    Data : <b>{{ selectedData }}</b>
-                </div>
-                <div>Model : {{ selectedModelName }}</div>
-                <div>Real Class : {{ selectedConfuion.real }}</div>
-                <div>Predicted Class : {{ selectedConfuion.pred }}</div>
-            </div>
-            <div class="instance-list">
-                <img v-for="(filename, index) in s_instances.filenames" class="instance-each" :src="filename" alt="misclassified instances" />
-            </div>
+      <!-- Instances -->
+      <div
+        class="section section__right section__bottom instances"
+        id="instances"
+      >
+        <div class="title instances__title">{{ s_instances.title }}</div>
+        <div class="description instances__description">
+          <div>
+            Data : <b>{{ selectedData }}</b>
+          </div>
+          <div>Model : {{ selectedModelName }}</div>
+          <div>Real Class : {{ selectedConfuion.real }}</div>
+          <div>Predicted Class : {{ selectedConfuion.pred }}</div>
         </div>
+        <div class="instance-list">
+          <img
+            v-for="(filename, index) in s_instances.filenames"
+            class="instance-each"
+            :src="filename"
+            alt="misclassified instances"
+          />
+        </div>
+      </div>
     </div>
-</body>
-<script src="./scripts/vis.util.js"></script>
-<script src="./scripts/app.js"></script>
-
+  </body>
+  <script src="./scripts/vis.util.js"></script>
+  <script src="./scripts/app.js"></script>
 </html>
