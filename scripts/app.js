@@ -57,6 +57,13 @@ const app = new Vue({
       IAMGE_WIDTH: null,
       IMAGE_HEIGHT: null,
     },
+    s_confusion_legend: {
+      WIDTH: 260,
+      HEIGHT: 100,
+      LEFT_MARGIN: 5,
+      RIGHT_MARGIN: 5,
+      SQUARE_HEIGHT: 50,
+    },
     s_projection: {
       title: '2D Projection',
       WIDTH: 323,
@@ -503,6 +510,33 @@ const app = new Vue({
         VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });
       });
     },
+    drawConfusionRectLegend: function (svg) {
+      svg.selectAll('*').remove();
+      const leftMargin = this.s_confusion_legend.LEFT_MARGIN;
+      const rightMargin = this.s_confusion_legend.RIGHT_MARGIN
+      const sectionW = (this.s_confusion_legend.WIDTH - leftMargin - rightMargin) / 100;
+      const y = 10;
+      for (let i = 0; i <= 100; i++) {
+        const errRate = i / 2000;
+        const x = sectionW * i + leftMargin;
+        const fill = this.colors.confusion_red(errRate);
+        const w = 10;
+        const h = this.s_confusion_legend.SQUARE_HEIGHT;
+        if (i % 100 === 0) {
+          const accStr = Math.floor(errRate * 100) + '%';
+          VisUtil.text(svg, accStr, {
+            x: x + w / 2,
+            y: y + h + 12,
+            fill: '#333',
+            anchor: i === 0 ? 'start' : 'end'
+          });
+        }
+        VisUtil.rect(svg, {
+          x, y, w, h, fill, st_width: 0,
+        });
+      }
+      VisUtil.sortSvgObjs(svg, ['circle', '.confusion-legend-up', 'line', 'text'])
+    },
     // get image index matrix of confusion
     getConfusionBy: function (preds, classNames) {
       const numOfClassElem = preds.length / classNames.length;
@@ -534,10 +568,9 @@ const app = new Vue({
         const x = x_start + real * w;
         for (let pred = 0; pred < classLen; pred++) {
           const y = pred * h;
-          const val = Math.floor(confusionMatrix[real][pred] * 1000) / 1000;
+          const val = confusionMatrix[real][pred];
           const color = (real === pred) ? 'rgb(255, 255, 255, 0)' : this.colors.confusion_red(val);
           VisUtil.rect(svg, { x, y, w, h, fill: color, st_width: '1px', class: `confusion-${real}-${pred}` });
-          // VisUtil.text(svg, val, { x: x + w / 2, y: y + h / 2 });
         }
       }
     },
@@ -697,6 +730,8 @@ const app = new Vue({
       const rankingSvg = d3.select('#vis-ranking');
       const confusionSvg = d3.select('#vis-confusion');
       const rankingLSvg = d3.select('#legend-ranking');
+      const confusionLSvg = d3.select('#legend-confusion');
+
       VisUtil.emptySvg('#vis-ranking');
       VisUtil.emptySvg('#vis-confusion');
       VisUtil.emptySvg('#vis-projection');
@@ -715,7 +750,7 @@ const app = new Vue({
       this.drawRankingCircleLegend(rankingLSvg)
       this.drawConfusionLegend(confusionSvg, classNames);
       this.drawConfusionAxis(confusionSvg, classNames);
-
+      this.drawConfusionRectLegend(confusionLSvg);
       // Visualize
       this.visualizeRanking(rankingSvg, newModels, dataName, this.rankingCriteria);
 
