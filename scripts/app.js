@@ -526,7 +526,7 @@ const app = new Vue({
           const accStr = Math.floor(errRate * 100) + '%';
           VisUtil.text(svg, accStr, {
             x: x + w / 2,
-            y: y + h + 12,
+            y: y + h + 13,
             fill: '#333',
             anchor: i === 0 ? 'start' : 'end'
           });

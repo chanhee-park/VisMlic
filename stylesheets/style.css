@@ -206,8 +206,8 @@ svg#vis-confusion {
 .section.instances>.instance-list {
   min-width: 100%;
   max-width: 100%;
-  min-height: 530px;
-  max-height: 530px;
+  min-height: 522px;
+  max-height: 522px;
   overflow-x: hidden;
   overflow-y: auto;
   padding: 10px;
