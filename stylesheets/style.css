@@ -178,11 +178,10 @@ svg {
 
 .ranking__title {
   height: 20px;
-  /* overlap 8px*/
 }
 
 svg#vis-ranking {
-  height: calc(100% - 16px);
+  height: calc(100% - 20px);
 }
 
 #confusion {

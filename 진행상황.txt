@@ -28,6 +28,15 @@
 0802(금)
   레전드 생성
 
+TODO: 레전드
+  Projection 뷰의 Legend 개발
+
+TODO: 랭킹 정렬
+  이름 / recall / precision / total accuracy 4개 옵션 제공
+
+TODO: 프로젝션 뷰 호버 이벤트
+  마우스 올리면 실제 인스턴스 보여주기 - 이미지와 예측 정보를 함께
+
 TODO: 모델 코드 .py: 
   주피터 노트북이 github에서 잘 안뜰때가 많다. 
   그리고, 코드 재사용성을 고려해봐도 .py가 깔끔하다. 
