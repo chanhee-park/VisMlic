@@ -28,8 +28,9 @@
 0802(금)
   레전드 생성
 
-TODO: 레전드
+0909(월)
   Projection 뷰의 Legend 개발
+  컬러맵 조정
 
 TODO: 랭킹 정렬
   이름 / recall / precision / total accuracy 4개 옵션 제공
