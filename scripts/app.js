@@ -21,10 +21,13 @@ const app = new Vue({
                     modelNames: ['dnn-15', 'dnn-10', 'dnn-5', 'dnn-3', 'slp']
                 }
             },
+            metrics: {
+                selected: 'recall',
+                items: ['recall', 'precision'], //ToDo: 'f1' 추가 필요
+            }
         },
         s_ranking: {
-            title: 'Ranking & Confusion Matrix',
-            sorting_options: ['recall', 'presicion'],
+            title: 'Performance Ranking',
             WIDTH: 1264,
             HEIGHT: 348,
             LEFT_LEGEND_WIDTH: 120,
@@ -80,7 +83,7 @@ const app = new Vue({
             VIS_HEIGHT: 335 - 30, // HEIGHT - 2 * PADDING 
         },
         s_instances: {
-            title: 'Instances',
+            title: 'Misclassified Instances',
             filenames: [],
         },
         // app.data -> dataset
@@ -147,14 +150,27 @@ const app = new Vue({
             }
             return models;
         },
-
+        /**
+         * 케이스 스터디를 위한 옵션 선택 기능 - 이 함수의 목정은 알고리즘, 파라미터 등 다양한 케이스를 변경하기 위함이다.
+         * @param {*} event 
+         * @param {*} idx 
+         */
         setCase: function(event, idx) {
             const newDataset = this.s_option.case.items[idx];
             this.s_option.case.selected = newDataset;
             this.selectedData = this.s_option.case[newDataset].dataset;
             this.selectedRankingModelNames = this.s_option.case[newDataset].modelNames;
         },
-
+        /**
+         * Recall, Precision, f1 등 모델 정렬을 위한 통계치를 선택한다.
+         * @param {*} event 
+         * @param {*} idx 
+         */
+        setMetrics: function(event, idx) {
+            const newMetrics = this.s_option.metrics.items[idx];
+            this.s_option.metrics.selected = newMetrics;
+            this.totalUpdate();
+        },
         /**
          * 모델 이름 하나와 데이터 셋 이름을 입력받아 해당 모델의 예측 결과를 반환한다.
          * @param {*} modelName 
@@ -274,7 +290,7 @@ const app = new Vue({
         },
         // 영역 상단에 클래스명 레전드를 그린다.
         drawRankingLegendTop: function(svg, classNames) {
-            VisUtil.text(svg, 'Actual Classes', { x: this.s_ranking.WIDTH / 2, fill: '#333', size: '24px', baseline: 'hanging' });
+            VisUtil.text(svg, 'Ground Truth Labels', { x: this.s_ranking.WIDTH / 2, fill: '#333', size: '20px', baseline: 'hanging' });
             const columnLegends = ['Accuracy', ...classNames];
             _.forEach(columnLegends, (text, i) => {
                 const x = this.s_ranking.LEFT_LEGEND_WIDTH +
@@ -438,7 +454,7 @@ const app = new Vue({
                 // Recalls or Precisions of each classes
                 _.forEach(classNames, (className, xi) => {
                     const rank = rankingByClass[className].indexOf(modelName);
-                    performance = Math.floor(models[modelName].performance[this.rankingCriteria][className] * 100);
+                    performance = Math.floor(models[modelName].performance[this.s_option.metrics.selected][className] * 100);
                     x = this.s_ranking.LEFT_LEGEND_WIDTH + (xi + 1) * this.s_ranking.CELL_WIDTH;
                     y = this.s_ranking.TOP_LEGEND_HEIGHT +
                         rank * this.s_ranking.CELL_HEIGHT +
@@ -566,10 +582,10 @@ const app = new Vue({
             const whole_h = this.s_confusion.HEIGHT;
             const cell_h = this.s_confusion.CELL_HEIGHT;
             const cell_w = this.s_confusion.CELL_WIDTH;
-            VisUtil.text(svg, 'Predicted Classes', { x: l_legend_w / 2, y: whole_h / 2, fill: '#333', size: '24px', 'writing-mode': 'tb', });
+            VisUtil.text(svg, 'Predicted Labels', { x: l_legend_w * 4 / 5, y: whole_h / 2, fill: '#333', size: '20px', 'writing-mode': 'tb', });
             _.forEach(classNames, (className, row) => {
                 VisUtil.text(svg, className, {
-                    x: l_legend_w + cell_w / 2,
+                    x: l_legend_w + cell_w * 5 / 6,
                     y: row * cell_h + cell_h / 2,
                 })
             });
@@ -792,6 +808,13 @@ const app = new Vue({
             return filenames;
         },
         /*-------------------------------- I N S T A N C E S --------------------------------*/
+        // and more
+        totalUpdate: function() {
+            console.log(this.models);
+            const models = this.models;
+            this.models = [];
+            this.models = models;
+        }
     },
     watch: {
         selectedData: async function(newdata) {
@@ -841,7 +864,7 @@ const app = new Vue({
             this.drawConfusionRectLegend(confusionLSvg);
 
             // Visualize
-            this.visualizeRanking(rankingSvg, newModels, dataName, this.rankingCriteria);
+            this.visualizeRanking(rankingSvg, newModels, dataName, this.s_option.metrics.selected);
 
             // Update Other Data
             this.selectedModelName = null;
