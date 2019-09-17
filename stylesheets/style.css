@@ -91,6 +91,8 @@ img.icon {
 .section__center {
     left: 300px;
     width: 1280px;
+    border-right: 2px solid #ccc;
+    border-left: 2px solid #ccc;
     flex: 2;
 }
 
@@ -99,6 +101,7 @@ img.icon {
 
 .section__right {
     right: 0;
+    /* margin-left: 10px; */
     width: calc(1920px - 300px - 1280px);
     border-left: 1px solid #ccc;
     flex: 1;

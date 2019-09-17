@@ -51,9 +51,9 @@ const app = new Vue({
             WIDTH: 1264,
             HEIGHT: 700,
             LEFT_LEGEND_WIDTH: 120,
-            TOP_LEGEND_HEIGHT: 0,
+            BOTTOM_LEGEND_HEIGHT: 10,
             CONFUSION_VIS_WIDHT: 1264 - 120, // WIDTH - LEFT_LEGEND_WIDTH,
-            CONFUSION_VIS_HEIGHT: 700 - 0, // HEIGHT - TOP_LEGEND_HEIGHT,
+            CONFUSION_VIS_HEIGHT: 700 - 10, // HEIGHT - BOTTOM_LEGEND_HEIGHT,
             NUM_OF_COLUMNS: null, // Set when data is loaded.
             CELL_WIDTH: null,
             CELL_HEIGHT: null,
@@ -592,16 +592,21 @@ const app = new Vue({
         },
         // draw axis for confusion matrix
         drawConfusionAxis: function(svg, classNames) {
-            const total_h = this.s_confusion.HEIGHT;
+            const total_h = this.s_confusion.CONFUSION_VIS_HEIGHT;
             const total_w = this.s_confusion.WIDTH;
             const l_legend_w = this.s_confusion.LEFT_LEGEND_WIDTH;
             const cell_w = this.s_confusion.CELL_WIDTH;
             const cell_h = this.s_confusion.CELL_HEIGHT;
             _.forEach(classNames, (className, idx) => {
                 const col_x = l_legend_w + cell_w + idx * cell_w;
+                const col_next_x = l_legend_w + cell_w + (idx + 1) * cell_w;
                 const row_y = idx * cell_h;
+                const row_next_y = (idx + 1) * cell_h;
                 VisUtil.line(svg, { x1: l_legend_w + cell_w, x2: total_w, y1: row_y, y2: row_y }); // 가로줄
-                VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h });
+                VisUtil.line(svg, { x1: l_legend_w + cell_w, x2: total_w, y1: row_next_y, y2: row_next_y }); // 가로줄
+                VisUtil.line(svg, { x1: col_x, x2: col_x, y1: 0, y2: total_h }); // 세로줄
+                VisUtil.line(svg, { x1: col_next_x, x2: col_next_x, y1: 0, y2: total_h }); // 세로줄
+
             });
         },
         drawConfusionRectLegend: function(svg) {
