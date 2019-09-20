@@ -280,8 +280,8 @@ const app = new Vue({
       } else if (mode === 'acc') {
         this.setColorOfModelsAbs(models);
       } else {
-        this.setColorOfModelsRel(models);
-        // this.setColorOfModelsAbs(models);
+        // this.setColorOfModelsRel(models);
+        this.setColorOfModelsAbs(models);
       }
     },
     setColorOfModelsRel: function (models) {
