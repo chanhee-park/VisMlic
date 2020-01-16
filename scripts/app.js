@@ -14,11 +14,11 @@ const app = new Vue({
         },
         Epochs: {
           dataset: 'mnist',
-          modelNames: ['dnn-5-ep30', 'dnn-5-ep20', 'dnn-5-ep15', 'dnn-5-ep10', 'dnn-5-ep5', 'dnn-5-ep2'] // , 'dnn-5-ep25', 'dnn-5-ep2'
+          modelNames: ['dnn-5-ep20', 'dnn-5-ep30', 'dnn-5-ep15', 'dnn-5-ep10', 'dnn-5-ep5', 'dnn-5-ep2'] // , 'dnn-5-ep25', 'dnn-5-ep2'
         },
         Layers: {
           dataset: 'mnist',
-          modelNames: ['dnn-15', 'dnn-10', 'dnn-5', 'dnn-3', 'slp']
+          modelNames: ['dnn-15', 'dnn-5', 'dnn-10', 'dnn-3', 'slp']
         }
       },
       metrics: {
